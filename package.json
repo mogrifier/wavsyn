@@ -1,0 +1,30 @@
+{
+  "name": "wavsyn",
+  "version": "1.0.0",
+  "description": "Tools for creating disk images containing wavetables for the Ensoniq Mirage",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mogrifier/wavsyn.git"
+  },
+  "keywords": [
+    "mirage",
+    "ensoniq",
+    "wavetable",
+    "synthesizer"
+  ],
+  "author": "Erich Izdepski",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mogrifier/wavsyn/issues"
+  },
+  "homepage": "https://github.com/mogrifier/wavsyn#readme",
+  "devDependencies": {
+    "electron": "^13.0.1",
+    "jest": "^27.0.3"
+  }
+}
