@@ -4,11 +4,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <script src="app/renderer/mirage.js"></script>
     <title>My Electron App</title>
 </head>
 
 <body>
-    <h1>Welcome to My Electron App</h1>
+    <h1>Wavsyn - Tools for creating Mirage Disk Images</h1>
+    We are using Node.js <span id="node-version"></span>,
+    Chromium <span id="chrome-version"></span>,
+    and Electron <span id="electron-version"></span>.
+
+<h2>Run a tool!</h2>
+<p>Choose a function, and the source and destination folders the function uses.</p>
+
+<div>
+    <label for="functions">Choose a function:</label>
+
+    <select name="functions" id="functions">
+      <option value="convert32_to_8bit">32bit to 8 bit conversion</option>
+      <option value="convert16_to_8bit">16bit to 8 bit conversion</option>
+      <option value="write_image">Write Disk Image</option>
+      <option value="convert_to_hfe">Convert to HFE</option>
+    </select>
+    <br>
+Source Folder
+<input type = "button" onclick = "selectSource()" value = "Source">  
+<br>
+Destination Folder
+<input type = "button" onclick = "selectDestination()" value = "Destination">
+<br>
+Run!
+<input type = "button" onclick = "execute()" value = "Run">  
+<br>
+</div>
+<div>
+Output Window:<br>
+<textarea id="logs" name="logs" rows = "15" cols="120" >hi</textarea>
+
+</div>
+
 </body>
 
 </html>

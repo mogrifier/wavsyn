@@ -1,11 +1,11 @@
 {
-  "name": "wavsyn",
+  "name": "Wavsyn",
   "version": "1.0.0",
   "description": "Tools for creating disk images containing wavetables for the Ensoniq Mirage",
   "main": "index.js",
   "scripts": {
     "start": "electron .",
-    "test": "jest"
+    "test": "jest test"
   },
   "repository": {
     "type": "git",
@@ -26,5 +26,8 @@
   "devDependencies": {
     "electron": "^13.0.1",
     "jest": "^27.0.3"
+  },
+  "dependencies": {
+    "esprima": "^4.0.1"
   }
 }
