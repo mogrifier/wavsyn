@@ -1,8 +1,3 @@
-function logit() {
-    console.log("this is from mirage.js");
-    window.alert("you clicked me!");
-}
-
 function execute() {
     window.alert("running workflow!");
 
@@ -10,5 +5,5 @@ function execute() {
 
     //call function in main/tools.js using IPC
 
-    
+
 }

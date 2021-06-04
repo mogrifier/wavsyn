@@ -1,11 +1,15 @@
 {
-  "name": "Wavsyn",
+  "name": "wavsyn",
   "version": "1.0.0",
   "description": "Tools for creating disk images containing wavetables for the Ensoniq Mirage",
   "main": "index.js",
   "scripts": {
-    "start": "electron .",
-    "test": "jest test"
+    "start": "electron-forge start",
+    "test": "jest test",
+    "lint": "eslint app/** -f html -o ./lint/report.html --cache:true",
+    "package": "electron-forge package",
+    "publish": "electron-forge publish",
+    "make": "electron-forge make --targets @electron-forge/maker-squirrel,@electron-forge/maker-zip"
   },
   "repository": {
     "type": "git",
@@ -24,10 +28,47 @@
   },
   "homepage": "https://github.com/mogrifier/wavsyn#readme",
   "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.57",
+    "@electron-forge/maker-deb": "^6.0.0-beta.57",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.57",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.57",
+    "@electron-forge/maker-zip": "^6.0.0-beta.57",
+    "@typescript-eslint/eslint-plugin": "^4.26.0",
+    "@typescript-eslint/parser": "^4.26.0",
     "electron": "^13.0.1",
+    "eslint": "^7.27.0",
     "jest": "^27.0.3"
   },
   "dependencies": {
+    "electron-squirrel-startup": "^1.0.0",
     "esprima": "^4.0.1"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "wavsyn"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin",
+            "win32"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
   }
 }
