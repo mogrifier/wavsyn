@@ -1,8 +1,8 @@
 {
   "name": "wavsyn",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Tools for creating disk images containing wavetables for the Ensoniq Mirage",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
     "start": "electron-forge start",
     "test": "jest test",

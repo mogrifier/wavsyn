@@ -3,6 +3,8 @@ const path = require("path");
 const shell = require('electron').shell
 const isMac = process.platform === 'darwin'
 
+var tools = require('./app/main/tools')
+
 let mainWindow;
 
 const loadMainWindow = () => {
@@ -22,8 +24,9 @@ const loadMainWindow = () => {
 
 //on ready event call loadMainWindow
 app.whenReady().then(() => {
-    loadMainWindow()
+    loadMainWindow();
   })
+
 
 // clean up properly after shutdown after event
 app.on("window-all-closed", () => {
@@ -41,12 +44,9 @@ app.on("window-all-closed", () => {
 
 //set up for communications with renderer process
 ipcMain.on("toMain", (event, args) => {
-    //just prove function name was received and echo it back from tools.js
-    var tool = args;
-    //javascript string interpolation (inserting a variable name) requies using backticks -` - vice quotes.
-    console.log(`main process running ${tool}`)
-    // Send result back to renderer process
-    mainWindow.webContents.send("fromMain", `you called the function ${tool}`);
+    var toolName = args;
+    // run tool given by name and send result back to renderer process
+    mainWindow.webContents.send("fromMain", tools.allTools[toolName]());
   });
 
 

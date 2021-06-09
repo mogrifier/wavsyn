@@ -20,12 +20,8 @@
 
 <div>
     <label for="functions">Choose a function:</label>
-
     <select name="functions" id="functions">
-      <option value="convert32_to_8bit">32bit to 8 bit conversion</option>
-      <option value="convert16_to_8bit">16bit to 8 bit conversion</option>
-      <option value="write_image">Write Disk Image</option>
-      <option value="convert_to_hfe">Convert to HFE</option>
+    <!-- the list of options is generated dynamically by preload.js, based on the function names in tools.js-->
     </select>
     <br>
 Source Folder
@@ -40,7 +36,7 @@ Run!
 </div>
 <div>
 Output Window:<br>
-<textarea id="logs" name="logs" rows = "15" cols="120" >hi</textarea>
+<textarea id="logs" name="logs" rows = "15" cols="120" ></textarea>
 
 </div>
 
