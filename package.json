@@ -19,10 +19,13 @@
     "mirage",
     "ensoniq",
     "wavetable",
-    "synthesizer"
+    "synthesizer",
+    "electron",
+    "node js",
+    "javascript"
   ],
   "author": "Erich Izdepski",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/mogrifier/wavsyn/issues"
   },

@@ -1,14 +1,19 @@
-const { app, BrowserWindow, Menu } = require("electron");
+const { app, BrowserWindow, ipcMain, Menu } = require("electron");
 const path = require("path");
 const shell = require('electron').shell
 const isMac = process.platform === 'darwin'
 
+let mainWindow;
+
 const loadMainWindow = () => {
-    const mainWindow = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         width : 1200,
         height: 800,
         webPreferences: {
-            preload: path.join(__dirname, 'app/preload/preload.js')
+          nodeIntegration: false, // is default value after Electron v5
+          contextIsolation: true, // protect against prototype pollution
+          enableRemoteModule: false, // turn off remote
+          preload: path.join(__dirname, 'app/preload/preload.js')
         }
     });
 
@@ -33,6 +38,17 @@ app.on("window-all-closed", () => {
         loadMainWindow();
     }
 });
+
+//set up for communications with renderer process
+ipcMain.on("toMain", (event, args) => {
+    //just prove function name was received and echo it back from tools.js
+    var tool = args;
+    //javascript string interpolation (inserting a variable name) requies using backticks -` - vice quotes.
+    console.log(`main process running ${tool}`)
+    // Send result back to renderer process
+    mainWindow.webContents.send("fromMain", `you called the function ${tool}`);
+  });
+
 
 //set up custom menus
 
