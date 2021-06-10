@@ -1,7 +1,8 @@
-const { app, BrowserWindow, ipcMain, Menu } = require("electron");
+const { app, BrowserWindow, ipcMain, Menu, dialog } = require("electron");
 const path = require("path");
 const shell = require('electron').shell
 const isMac = process.platform === 'darwin'
+
 
 var tools = require('./app/main/tools')
 
@@ -47,8 +48,35 @@ ipcMain.on("toMain", (event, args) => {
     var toolName = args;
     // run tool given by name and send result back to renderer process
     mainWindow.webContents.send("fromMain", tools.allTools[toolName]());
-  });
+});
 
+ipcMain.on("selectDirectory", (event, args) => {
+  console.log("in select directory in main process")
+
+    let options = {
+      title : "Open location for processing", 
+      //defaultPath : "D:\\electron-app",
+      buttonLabel : "Choose Location",
+      properties: ['openDirectory']
+      }
+    dialog.showOpenDialog(mainWindow, options).then(result => {
+
+      if (result.canceled) {
+        //cancelled so no directory selected
+        let msg = "directory selection cancelled"
+        console.log(msg)
+        mainWindow.webContents.send("fromMain", msg);
+      }
+      else {
+        let msg = `selected ${result.filePaths[0]}`
+        console.log(msg)
+        mainWindow.webContents.send("fromMain", msg);
+      }
+      }).catch(err => {
+        console.log(err)
+        mainWindow.webContents.send("fromMain", err);
+      })
+});
 
 //set up custom menus
 
