@@ -43,7 +43,7 @@ contextBridge.exposeInMainWorld(
             }
         },
         receive: (channel, data) => {
-            let validChannels = ["fromMain"];
+            let validChannels = ["fromMain", "selectDirectory"];
             if (validChannels.includes(channel)) {
               console.log(`in method receive; got ${data} from channel ${channel}`);
               // Deliberately strip event as it includes `sender` 

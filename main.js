@@ -45,9 +45,11 @@ app.on("window-all-closed", () => {
 
 //set up for communications with renderer process
 ipcMain.on("toMain", (event, args) => {
-    var toolName = args;
+    var toolName = args.tool;
+    var source = args.source
+    var destination = args.destination
     // run tool given by name and send result back to renderer process
-    mainWindow.webContents.send("fromMain", tools.allTools[toolName]());
+    mainWindow.webContents.send("fromMain", tools.allTools[toolName](source, destination));
 });
 
 ipcMain.on("selectDirectory", (event, args) => {
@@ -65,16 +67,25 @@ ipcMain.on("selectDirectory", (event, args) => {
         //cancelled so no directory selected
         let msg = "directory selection cancelled"
         console.log(msg)
-        mainWindow.webContents.send("fromMain", msg);
+        mainWindow.webContents.send("selectDirectory", msg);
       }
       else {
-        let msg = `selected ${result.filePaths[0]}`
+        let msg = new Array(2)
+        if (args =="source")
+        {
+          msg[0] = "source"
+        }
+        else {
+          msg[0] = "destination"
+        }
+        
+        msg[1] = `selected ${result.filePaths[0]}`
         console.log(msg)
-        mainWindow.webContents.send("fromMain", msg);
+        mainWindow.webContents.send("selectDirectory", msg);
       }
       }).catch(err => {
         console.log(err)
-        mainWindow.webContents.send("fromMain", err);
+        mainWindow.webContents.send("selectDirectory", err);
       })
 });
 
