@@ -79,8 +79,8 @@ ipcMain.on("selectDirectory", (event, args) => {
           msg[0] = "destination"
         }
         
-        msg[1] = `selected ${result.filePaths[0]}`
-        console.log(msg)
+        msg[1] = result.filePaths[0]
+        console.log(`selected ${msg}`)
         mainWindow.webContents.send("selectDirectory", msg);
       }
       }).catch(err => {

@@ -18,7 +18,6 @@ function execute() {
 //receives callback from the main process
 window.api.receive('fromMain', (event, arg) => {
     //write response to the logs textarea
-    console.log(arg)
     document.getElementById("logs").value += arg
 })
 
@@ -39,10 +38,12 @@ window.api.receive('selectDirectory', (event, arg) => {
         if (arg[0] == "source") {
             console.log(`got source directory ${arg[1]}`)
             currentSource = arg[1]
+            document.getElementById("currentSource").value = currentSource 
         }
         else {
             console.log(`got destination directory ${arg[1]}`)
             currentDestination = arg[1]
+            document.getElementById("currentDestination").value = currentDestination 
         }
         //write response to the logs textarea
         for (var i = 0; i < arg.length; i++) { 

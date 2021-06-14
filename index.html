@@ -19,20 +19,40 @@
       </h6>
     
 
-<h2>Run a tool!</h2>
-<p>Choose a function, and the source and destination folders the function uses.</p>
+<h2>Process Samples For Use</h2>
 
-<div>
-    <label for="functions">Choose a function:</label>
-    <select name="functions" id="functions">
-    <!-- the list of options is generated dynamically by preload.js, based on the function names in tools.js-->
-    </select>
-    <br>
-Source Folder
-<input type = "button" onclick = "selectSource()" value = "Source">  
-<br>
-Destination Folder
-<input type = "button" onclick = "selectDestination()" value = "Destination">
+<table id="t" class="table">
+    <thead class="thead-dark">
+      <tr>
+        <th>Step</th>
+        <th>Choose Inputs</th>
+        <th>Current values</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Choose the source folder for the process</td>
+        <td><input type = "button" onclick = "selectSource()" value = "Source"></td>
+        <td><input id="currentSource" type = "textfield" editable="false" size = "50" value = "Source"></td>
+      </tr>
+      <tr>
+        <td>Choose a process to run</td>
+        <td><select name="functions" id="functions">
+            <!-- the list of options is generated dynamically by preload.js, based on the function names in tools.js-->
+            </select></td>
+        <td id="functionHelp"></td>
+      </tr>
+      <tr>
+        <td id="functionHelp" colspan="3">help goes here</td>
+      </tr>
+      <tr>
+        <td>Choose the Destination Folder for the process</td>
+        <td><input type = "button" onclick = "selectDestination()" value = "Destination"></td>
+        <td><input id="currentDestination" type = "textfield" editable="false" size = "50" value = "Destination"></td>
+      </tr>
+    </tbody>
+  </table>
+
 <br>
 Run!
 <input type = "button" onclick = "execute()" value = "Run">  
