@@ -9,8 +9,7 @@ var TRACK_LENGTH = 5632
 
 /* This is like the public interface of the tools.js module **/
         //put each function for manipulating wavetables, samples, and image files in here
-module.exports = {
-    allTools : {
+var allTools = {
     convert32_to_8bit: function (source, destination) {
         var logString = new Array()
         console.log (`processing ${source} file(s) and writing to ${destination}`)
@@ -43,13 +42,11 @@ module.exports = {
     write_image: function (source, destination) {
         console.log (`processing ${source} file(s) and writing to ${destination}`)
         console.log("write_image")
-        var fileToRead = "sample.txt"
-        code.readFileBytes(fileToRead, source)
 
         return "write image complete"
     }
 }
-}
+
 
 /* Functions here are not exported and are meant to be used internally by various tool functions.
 They are utilities shared by all functions.
@@ -98,7 +95,9 @@ var code = {
             //value is expected to be in range -1 to + 1. Convert to 0 - 255.
             eight_bit[index] = Math.round((value[0] + 1) / 2 * 255)
             index += 1
+            //console.log(value + " as 8 bit " + eight_bit)
         }
+        
         return eight_bit
     },
 
@@ -109,4 +108,5 @@ var code = {
 }
 
 //end of internal namespace
-module.exports = code
+exports.code = code
+exports.allTools = allTools
