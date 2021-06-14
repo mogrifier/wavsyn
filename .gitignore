@@ -3,5 +3,4 @@ lint/
 out/
 coverage/
 .eslintcache
-coverage/
 

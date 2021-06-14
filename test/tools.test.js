@@ -1,4 +1,4 @@
-//const tools = require('../app/main/tools.js');
+const fs = require ("fs")
 const {allTools, code} = require('../app/main/tools.js');
 
 //first argument is the test name, second is a function to run. Uses 'expect' like 'assert'.
@@ -28,9 +28,11 @@ test('getFileList', () => {
 test('convert_32bf_to_8bit', () => {
 
   //call public function instead . compare resulting file contents. add test files to this directory.
+  allTools.convert32_to_8bit ("./test/assets/source", "./test/assets/destination")
+  let eightBit = code.readFileBytes("8bit_Wave 03.wav", "./test/assets/destination")
+  //just looking at length vice a comparison of contents
+  expect(eightBit.length).toBe(2048)
+  //clean up
+  fs.rmSync("./test/assets/destination/8bit_Wave 03.wav")
 
-  let testData = "238746385768623568356342"
-  let results = "5475"
-  let eightBit= code.convert_32bf_to_8bit(testData)
-  expect(eightBit).toBe(results)
 });
