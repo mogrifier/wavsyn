@@ -16,12 +16,18 @@ window.addEventListener('DOMContentLoaded', () => {
       //log each function - this prints the name and the function source code!
       console.log(`tool ${toolName} = ${tools.allTools[toolName]}`)
       //Create and append select list
-      var selectList = document.getElementById("functions")
-      //Create and append the options
-      var option = document.createElement("option");
-      option.value = toolName;
-      option.text = toolName;
-      selectList.appendChild(option);
+      if (toolName != "help") {
+        var selectList = document.getElementById("functions")
+        //Create and append the options
+        var option = document.createElement("option");
+        option.value = toolName;
+        option.text = toolName;
+        selectList.appendChild(option);
+      }
+      else {
+        //load hidden field value with help json
+        document.getElementById("helpJSON").value = JSON.stringify(tools.allTools["help"])
+      }
     }
   })
 

@@ -44,7 +44,9 @@ var allTools = {
         console.log("write_image")
 
         return "write image complete"
-    }
+    },
+    help: {"write_image":"write a mirage disk image", "convert_to_hfe":"convert a disk image to hfe", 
+    "convert16_to_8bit":"convert 16 bit files to 8 bit", "convert32_to_8bit":"convert 32 bit float files to 8 bit"}
 }
 
 

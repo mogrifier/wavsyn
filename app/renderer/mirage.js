@@ -32,6 +32,15 @@ function selectSource() {
     window.api.send('selectDirectory','source')
 }
 
+//name is the selected function name. will be a help JSON key
+function showHelp() {
+    var name = document.getElementById("functions").value;
+    console.log(name)
+    var currentHelp = JSON.parse(document.getElementById('helpJSON').value)
+    document.getElementById('functionHelp').innerHTML = currentHelp[name]
+    console.log(currentHelp[name])
+}
+
 window.api.receive('selectDirectory', (event, arg) => {
     if (arg.length == 2) {
         //arg is the directory selected and source or destination. get its path info

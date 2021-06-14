@@ -18,49 +18,44 @@
     and Electron <span id="electron-version"></span>.
       </h6>
     
-
-<h2>Process Samples For Use</h2>
-
 <table id="t" class="table">
     <thead class="thead-dark">
       <tr>
-        <th>Step</th>
+        <th>Steps</th>
         <th>Choose Inputs</th>
         <th>Current values</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td>Choose the source folder for the process</td>
+        <td>Choose the Source Folder for the process</td>
         <td><input type = "button" onclick = "selectSource()" value = "Source"></td>
-        <td><input id="currentSource" type = "textfield" editable="false" size = "50" value = "Source"></td>
+        <td><input id="currentSource" type = "textfield" editable="false" size = "50" value = ""></td>
       </tr>
       <tr>
         <td>Choose a process to run</td>
-        <td><select name="functions" id="functions">
+        <td><select name="functions" id="functions" onchange="showHelp()">
             <!-- the list of options is generated dynamically by preload.js, based on the function names in tools.js-->
             </select></td>
-        <td id="functionHelp"></td>
+        <td></td>
       </tr>
       <tr>
-        <td id="functionHelp" colspan="3">help goes here</td>
+        <td id="functionHelp" colspan="3" bgcolor="yellow"></td>
       </tr>
       <tr>
         <td>Choose the Destination Folder for the process</td>
         <td><input type = "button" onclick = "selectDestination()" value = "Destination"></td>
-        <td><input id="currentDestination" type = "textfield" editable="false" size = "50" value = "Destination"></td>
+        <td><input id="currentDestination" type = "textfield" editable="false" size = "50" value = ""></td>
       </tr>
     </tbody>
   </table>
 
-<br>
-Run!
-<input type = "button" onclick = "execute()" value = "Run">  
+<input type = "button" onclick = "execute()" value = "Run Process">  
 <br>
 </div>
 <div>
 Output Window:<br>
-<textarea id="logs" name="logs" rows = "12" cols="120" ></textarea>
+<textarea id="logs" name="logs" rows = "10" cols="120" ></textarea>
 
 </div>
 </main>
@@ -70,7 +65,8 @@ Output Window:<br>
 <small class="d-block mb-3 text-muted">Wavsyn © 2021 by Erich Izdepski</small>
 </div>
 </footer>
-
+<!-- internal variable set by preload.js-->
+<input id="helpJSON" hidden="true"  type = "textfield" value = "wtf">
 </body>
 
 </html>
