@@ -62,7 +62,7 @@ var code = {
         //allocate new buffer to size without header
         var pcm = Buffer.alloc(data.byteLength - size)
         //return data (bytearray) without 44 byte header as a new Buffer
-        data.copy(pcm, size, data.byteLength )
+        data.copy(pcm, 0, size, data.byteLength )
         return pcm
     },
 
@@ -95,7 +95,8 @@ var code = {
             //read 4 and unpack 4 bytes in little-endian order to a float
             let value = input_bytes.readFloatLE(i)
             //value is expected to be in range -1 to + 1. Convert to 0 - 255.
-            eight_bit[index] = Math.round((value[0] + 1) / 2 * 255)
+            //note there are minor differences between this code and python. Maybe floating point handling or rounding.
+            eight_bit[index] = Math.round(((value + 1) / 2) * 255)
             index += 1
             //console.log(value + " as 8 bit " + eight_bit)
         }

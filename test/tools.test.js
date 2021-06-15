@@ -30,8 +30,9 @@ test('convert_32bf_to_8bit', () => {
   //call public function instead . compare resulting file contents. add test files to this directory.
   allTools.convert32_to_8bit ("./test/assets/source", "./test/assets/destination")
   let eightBit = code.readFileBytes("8bit_Wave 03.wav", "./test/assets/destination")
-  //just looking at length vice a comparison of contents
-  expect(eightBit.length).toBe(2048)
+  let goodEightBit = code.readFileBytes("Wave_03_8bit.wav", "./test/assets")
+  //compare file contents as buffers
+  expect(goodEightBit.equals(eightBit)).toBe(true)
   //clean up
   fs.rmSync("./test/assets/destination/8bit_Wave 03.wav")
 
