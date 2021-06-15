@@ -29,10 +29,22 @@ var allTools = {
         return logString
     },
     convert16_to_8bit: function (source, destination) {
+        var logString = new Array()
         console.log (`processing ${source} file(s) and writing to ${destination}`)
         console.log("running convert16_to_8bit")
-
-        return "16 to 8 bit conversion complete"
+        //read files into buffers and process using function below
+        let allFiles = code.getFileList(source)
+        let index = 0
+        for (const fileName of allFiles){
+            console.log (`converting ${fileName} to 8-bit`)
+            let data16 = code.readFileBytes(fileName, source)
+            //remove 44 byte header and convert
+            let data8 = code.convert_16b_to_8bit(code.removeWaveHeader(data16))
+            //write new data to a file
+            code.writeFile(data8, "8bit_" + fileName, destination)
+            logString[index++] = `converting ${fileName} to 8-bit\n`
+        }
+        return logString
     },
     convert_to_hfe: function (source, destination) {
         console.log (`processing ${source} file(s) and writing to ${destination}`)
@@ -45,8 +57,10 @@ var allTools = {
 
         return "write image complete"
     },
-    help: {"write_image":"write a mirage disk image", "convert_to_hfe":"convert a disk image to hfe", 
-    "convert16_to_8bit":"convert 16 bit files to 8 bit", "convert32_to_8bit":"convert 32 bit float files to 8 bit"}
+    help: {"write_image":"write a mirage disk image", 
+    "convert_to_hfe":"convert a disk image to hfe", 
+    "convert16_to_8bit":"convert 16 bit mono files to 8 bit unsigned raw data. If wave header present, assumes 44 byte length",
+    "convert32_to_8bit":"convert 32 bit float mono files to 8 bit unsigned raw data. If wave header present, assumes 100 byte length"}
 }
 
 
@@ -59,6 +73,11 @@ Non-exported functions are like 'private' functions **/
 var code = {
 
     removeWaveHeader : function (data, size = WAVHEADER) {
+        //test if a wave file first. If no, then return data
+        if (!code.isWaveFile(data)) {
+            return data
+        }
+
         //allocate new buffer to size without header
         var pcm = Buffer.alloc(data.byteLength - size)
         //return data (bytearray) without 44 byte header as a new Buffer
@@ -96,17 +115,41 @@ var code = {
             let value = input_bytes.readFloatLE(i)
             //value is expected to be in range -1 to + 1. Convert to 0 - 255.
             //note there are minor differences between this code and python. Maybe floating point handling or rounding.
-            eight_bit[index] = Math.round(((value + 1) / 2) * 255)
-            index += 1
-            //console.log(value + " as 8 bit " + eight_bit)
+            eight_bit[index++] = Math.round(((value + 1) / 2) * 255)
         }
         
+        return eight_bit
+    },
+
+    convert_16b_to_8bit : function (input_bytes) {
+        let size = input_bytes.length
+        //16 bit ints are 2 byte values.
+        let eight_bit = Buffer.alloc(size / 2)
+        var index = 0
+        for (let i = 0; i < size; i += 2) {
+            //not as simple as I thought. Need unsigned values from signed 16 bit data
+            let value = input_bytes.readInt16LE(i)
+            //change range to 0 - 65535 and grab MSB
+            eight_bit[index++] = Math.round((value + 32768) / 255)
+        }
         return eight_bit
     },
 
     //source is a directory
     getFileList : function (source) {
         return fs.readdirSync(source)
+    },
+
+    isWaveFile : function (data) {
+        // look at start of data bytes for wave header info
+        //http://www-mmsp.ece.mcgill.ca/Documents/AudioFormats/WAVE/WAVE.html
+        var riff = data.slice(0, 16).toString("utf-8", 0, 16)
+        if (riff.startsWith("RIFF")) {
+            return true
+        }
+        else {
+            return false
+        }
     }
 }
 

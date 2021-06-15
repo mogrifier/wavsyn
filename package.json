@@ -44,8 +44,7 @@
     "jest": "^27.0.3"
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0",
-    "esprima": "^4.0.1"
+    "electron-squirrel-startup": "^1.0.0"
   },
   "config": {
     "forge": {
