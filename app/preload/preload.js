@@ -13,8 +13,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
     //dynamically replace contents of the dropdown box containing the function list
     for (const toolName in tools.allTools) {
-      //log each function - this prints the name and the function source code!
-      console.log(`tool ${toolName} = ${tools.allTools[toolName]}`)
       //Create and append select list
       if (toolName != "help") {
         var selectList = document.getElementById("functions")
@@ -23,6 +21,8 @@ window.addEventListener('DOMContentLoaded', () => {
         option.value = toolName;
         option.text = toolName;
         selectList.appendChild(option);
+        //log each function name
+        console.log(`added function ${toolName} to select options`)
       }
       else {
         //load hidden field value with help json
