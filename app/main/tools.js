@@ -1,4 +1,3 @@
-const buffer = require ("buffer")
 const path = require ("path")
 const fs = require ("fs")
 
@@ -129,7 +128,6 @@ var code = {
         var clean_wavesample = Buffer.alloc(66560)
         var wave_data = 5120
         for (var start = 0; start < 13; start++) {
-            let end = start * wave_data + wave_data
             //console.log(`copying bytes ${start * TRACK_LENGTH}:${start * TRACK_LENGTH + wave_data}`)
             //console.log(`to ${start * wave_data}:${end}`)
             samples.copy(clean_wavesample, start * wave_data, start * TRACK_LENGTH, start * TRACK_LENGTH + wave_data)
