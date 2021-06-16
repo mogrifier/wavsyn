@@ -52,9 +52,13 @@ ipcMain.on("toMain", (event, args) => {
     mainWindow.webContents.send("fromMain", tools.allTools[toolName](source, destination));
 });
 
-ipcMain.on("openBrowser", (event, args) => {
-  shell.openExternal(args)
-});
+ipcMain.on("showWarning", (event, args) => {
+  let options = {
+    title : "Warning",
+    message : args
+    }
+  dialog.showMessageBoxSync(mainWindow, options)
+})
 
 ipcMain.on("selectDirectory", (event, args) => {
   console.log("in select directory in main process")

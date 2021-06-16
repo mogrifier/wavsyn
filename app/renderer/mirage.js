@@ -3,6 +3,14 @@ var currentDestination
 
 //call back end functions using IPC and an API to avoid exposing all of Node
 function execute() {
+    //verify source and destination are set.
+    if (currentSource == null || currentDestination == null)
+    {
+        //pop modal warning
+        window.api.send('showWarning', "Source and Destination must be set")
+        return
+    }
+
     //read value of drop down box
     //must also send source and destination
     var command = {tool: document.getElementById("functions").value, 
