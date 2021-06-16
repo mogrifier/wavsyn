@@ -57,10 +57,63 @@ var allTools = {
 
         return "write image complete"
     },
-    help: {"write_image":"write a mirage disk image", 
-    "convert_to_hfe":"convert a disk image to hfe", 
-    "convert16_to_8bit":"convert 16 bit mono files to 8 bit unsigned raw data. If wave header present, assumes 44 byte length",
-    "convert32_to_8bit":"convert 32 bit float mono files to 8 bit unsigned raw data. If wave header present, assumes 100 byte length"}
+
+    /**This will extract the data from a mirage disk image (original, not hfe) in source
+    and write it out as 6 wavesample files to destination. They are raw pcm data (no wav header). 
+    Format is: mono, unsigned 8 bit
+    */
+    extractWavesamples: function (source, destination) {
+        console.log (`processing ${source} file(s) and writing to ${destination}`)
+        //read files into buffers and process using function below
+        let allFiles = code.getFileList(source)
+        for (const fileName of allFiles){
+            /** create six separate arrays of binary data, each initially 72704 bytes.
+            This contains the 64KB wavesample plus extra 512 byte sectors
+            and initial 1024 byte parameter data to be removed. */
+            var mirageData = code.readFileBytes(fileName, source)
+            console.log(`data read = ${mirageData.length}.`)
+            //wavesample plus extra data size
+            var sample_size = 72704
+            //should be a 440kb image file. extension can be img or edm
+            var name_stub = path.parse(fileName).name
+            //track start number for samples
+            var sample_metadata = {}
+            //could not create using json string- causing parser error.
+            sample_metadata[name_stub +"_lh1.wav"] = 2
+            sample_metadata[name_stub + "_uh1.wav"] = 15
+            sample_metadata[name_stub + "_lh2.wav"] = 28
+            sample_metadata[name_stub + "_uh2.wav"] = 41
+            sample_metadata[name_stub + "_lh3.wav"] = 54
+            sample_metadata[name_stub + "_uh3.wav"] = 67
+
+            //calculate offset and remove short sectors
+            //lower half wavesample 1, starts at sector 2 (skips 0 and 1)
+            Object.keys(sample_metadata).forEach(function(key) {                
+                let soundName = key
+                let track = sample_metadata[soundName]
+                //create a new byte array containing correct data (64KB chunk)
+                let offset = track * TRACK_LENGTH
+                var pcm = Buffer.alloc(sample_size)
+                mirageData.copy(pcm, 0, offset, offset + sample_size)
+                console.log(`***** processing ${soundName} *****`)
+                let wavesample = code.collapseWaveData(pcm)
+                code.writeFile(wavesample, soundName, destination)
+            })
+        }
+    },
+
+    help: {"write_image":`Write a mirage disk image. This creates a 440KB disk image file for use with 
+    Omniflop. See the Software menu to download.`, 
+
+    "convert_to_hfe":`Convert a disk image to hfe. You need to have HxCFloppyEmulator installed AND on your PATH. 
+    See the Software menu to download.`, 
+
+    "convert16_to_8bit":"Convert 16 bit mono files to 8 bit unsigned raw data. If wave header present, assumes 44 byte length.",
+
+    "convert32_to_8bit":"Convert 32 bit float mono files to 8 bit unsigned raw data. If wave header present, assumes 100 byte length.",
+
+    "extractWavesamples": `Remove all 6 sound chunks from a mirage disk image and write as 6 separate 
+    64KB files of 8-bit, unsigned pcm data. File names are based on image file name with a suffix indicating the sound they came from.`}
 }
 
 
@@ -71,6 +124,19 @@ Non-exported functions are like 'private' functions **/
 //Remove the 44 byte wavheader from the Buffer passed in. Returns a new Buffer.
 
 var code = {
+
+    collapseWaveData : function (samples) {
+        var clean_wavesample = Buffer.alloc(66560)
+        var wave_data = 5120
+        for (var start = 0; start < 13; start++) {
+            let end = start * wave_data + wave_data
+            console.log(`copying bytes ${start * TRACK_LENGTH}:${start * TRACK_LENGTH + wave_data}`)
+            console.log(`to ${start * wave_data}:${end}`)
+            samples.copy(clean_wavesample, start * wave_data, start * TRACK_LENGTH, start * TRACK_LENGTH + wave_data)
+        }
+        //skip first 1024 bytes of parameter data
+        return clean_wavesample.slice(1024, 66560)
+    },
 
     removeWaveHeader : function (data, size = WAVHEADER) {
         //test if a wave file first. If no, then return data

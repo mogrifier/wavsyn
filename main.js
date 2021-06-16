@@ -52,6 +52,10 @@ ipcMain.on("toMain", (event, args) => {
     mainWindow.webContents.send("fromMain", tools.allTools[toolName](source, destination));
 });
 
+ipcMain.on("openBrowser", (event, args) => {
+  shell.openExternal(args)
+});
+
 ipcMain.on("selectDirectory", (event, args) => {
   console.log("in select directory in main process")
 
@@ -179,6 +183,21 @@ const template = [
       ] : [
         { role: 'close' }
       ])
+    ]
+  },
+  {
+    label: 'Software',
+    submenu: [
+      { label: 'Omniflop', 
+      click() { 
+        shell.openExternal('http://www.shlock.co.uk/Utils/OmniFlop/OmniFlop.htm')
+    } 
+     },
+     { label: 'HxC Floppy Emulator', 
+      click() { 
+        shell.openExternal('https://hxc2001.com/download/floppy_drive_emulator/')
+    } 
+     }
     ]
   },
   {

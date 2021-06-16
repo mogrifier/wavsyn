@@ -32,7 +32,7 @@ test('getFileList', () => {
   let list = code.getFileList(".")
   console.log(list)
   //19 files and directories in root of project
-  expect(list.length).toBe(19)
+  expect(list.length).toBe(20)
 });
 
 test('convert32_to_8bit', () => {
@@ -58,5 +58,18 @@ test('convert16_to_8bit', () => {
   expect(goodEightBit.equals(eightBit)).toBe(true)
   //clean up
   //fs.rmSync("./test/assets/16bit/destination/8bit_testdata16b.wav")
+
+});
+
+test('extractWavesamples', () => {
+
+  //call public function instead . compare resulting file contents. add test files to this directory.
+  allTools.extractWavesamples ("./test/assets/mirage_images/source", "./test/assets/mirage_images/destination")
+  let soundFile = code.readFileBytes("8bit_testdata16b.wav", "./test/assets/mirage_images/destination")
+  let goodSound = code.readFileBytes("8bit_sample.wav", "./test/assets/mirage_images")
+  //compare file contents as buffers
+  throw "not implemented"
+  //clean up
+  //fs.rmSync("./test/assets/16bit/destination/*.wav")
 
 });

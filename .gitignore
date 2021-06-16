@@ -3,4 +3,5 @@ lint/
 out/
 coverage/
 .eslintcache
+test/assets/**/destination
 

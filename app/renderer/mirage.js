@@ -1,4 +1,3 @@
-
 var currentSource
 var currentDestination
 
@@ -65,7 +64,4 @@ window.api.receive('selectDirectory', (event, arg) => {
         console.log(arg)
         document.getElementById("logs").value += arg
     }
-
-    
 })
-
