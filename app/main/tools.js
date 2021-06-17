@@ -1,18 +1,18 @@
 const path = require ("path")
 const fs = require ("fs")
-
+//const {main} = require("../../main.js")
 
 //Global variables
 var WAVHEADER = 44
 var TRACK_LENGTH = 5632
+var MIRAGESOUNDS = 393216
+var TEMPLATE = "sample_template_16kb.img"
 
 /* This is like the public interface of the tools.js module **/
         //put each function for manipulating wavetables, samples, and image files in here
 var allTools = {
     convert32_to_8bit: function (source, destination) {
         var logString = new Array()
-        console.log (`processing ${source} file(s) and writing to ${destination}`)
-        console.log("running convert32_to_8bit")
         //read files into buffers and process using function below
         let allFiles = code.getFileList(source)
         let index = 0
@@ -29,8 +29,6 @@ var allTools = {
     },
     convert16_to_8bit: function (source, destination) {
         var logString = new Array()
-        console.log (`processing ${source} file(s) and writing to ${destination}`)
-        console.log("running convert16_to_8bit")
         //read files into buffers and process using function below
         let allFiles = code.getFileList(source)
         let index = 0
@@ -46,15 +44,8 @@ var allTools = {
         return logString
     },
     convert_to_hfe: function (source, destination) {
-        console.log (`processing ${source} file(s) and writing to ${destination}`)
         console.log("running convert_to_hfe")
         return "hfe conversion complete"
-    },
-    write_image: function (source, destination) {
-        console.log (`processing ${source} file(s) and writing to ${destination}`)
-        console.log("write_image")
-
-        return "write image complete"
     },
 
     /**This will extract the data from a mirage disk image (original, not hfe) in source
@@ -62,7 +53,6 @@ var allTools = {
     Format is: mono, unsigned 8 bit
     */
     extractWavesamples: function (source, destination) {
-        console.log (`processing ${source} file(s) and writing to ${destination}`)
         //read files into buffers and process using function below
         let allFiles = code.getFileList(source)
         for (const fileName of allFiles){
@@ -101,18 +91,69 @@ var allTools = {
         }
     },
 
-    help: {"write_image":`Write a mirage disk image. This creates a 440KB disk image file for use with 
-    Omniflop. See the Software menu to download.`, 
+    // Reads files from source and writes to a mirage disk image format in destination
+    // using a template to insert the data in. The template contains the Mirage OS, sound parameters, wavetable
+    // settings, and global mirage config parameters.
+    // Source Files should be 384KB, with defined 64KB chunks representing samples for each Mirage Sound.
+    writeDiskImage: function (source, destination) {
+        // this is a pretty good choice for a template since all 12 programs are setup (I think)
+        var template = code.readFileBytes(TEMPLATE, "./app/assets")
+        var logString = new Array()
+        var index = 0
+        let allFiles = code.getFileList(source)
+        for (const fileName of allFiles){
+            var name_stub = path.parse(fileName).name
+            var wavesamples = code.readFileBytes(fileName, source)
+            wavesamples = code.removeWaveHeader(wavesamples)
+            if (wavesamples.length != MIRAGESOUNDS) {
+                logString[index++] = `skipping file ${fileName} since it does not contain ${MIRAGESOUNDS} bytes as required\n`
+                continue
+            }
+            var newImage = Buffer.alloc(template.byteLength)
+            //write template data to newImage (newImage is reused for each file so a new object is needed)
+            template.copy(newImage, 0, 0, template.byteLength)
+            // go through the tracks/sectors and write data. copy template to the newImage as you go.
+            // each wavesample starts at the given track PLUS 1024 bytes
+            // write 78 sectors worth of data (6 * 64KB) into the 5120 byte slots in the template
+            for (var count = 0; count < 6; count++) {
+                for (var x = 0; x < 13; x++) {
+                    var track = (count * 13) + x + 2
+                    var position = track * TRACK_LENGTH
+                    var wavesample_position = count * 65536 + x * 5120
+                    if (x == 0) {
+                        // skip 1024 and copy 4096 for first sector of each sample.
+                        wavesample_position = count * 65536
+                        //mirageData.copy(pcm, 0, offset, offset + sample_size)
+                        wavesamples.copy(newImage, position + 1024, wavesample_position, wavesample_position + 4096)
+                    }
+                    else {
+                        wavesample_position = count * 65536 + 4096 + (x - 1) * 5120
+                        wavesamples.copy(newImage, position, wavesample_position, wavesample_position + 5120)
+                    }
+                }
+            }
+            // save the new disk image, named after the wave data file. extension img is equivalent to edm.
+            code.writeFile(newImage, name_stub + ".img", destination)
+            logString[index++] = `wrote mirage image ${name_stub + ".img"} to ${destination}\n`
+        }
+        return logString
+    },
+
+
+    help: {"writeDiskImage":`Write a mirage disk image from 384KB source audio files. Files must be unsigned 8 bit,
+     mono, PCM. The wave header will be removed if present. This creates a 440KB disk image file for use with 
+    Omniflop or conversion to HFE. See the Software menu to download additional tools.`, 
 
     "convert_to_hfe":`Convert a disk image to hfe. You need to have HxCFloppyEmulator installed AND on your PATH. 
-    See the Software menu to download.`, 
+    See the Software menu to download additional tools.`, 
 
     "convert16_to_8bit":"Convert 16 bit mono files to 8 bit unsigned raw data. If wave header present, assumes 44 byte length.",
 
     "convert32_to_8bit":"Convert 32 bit float mono files to 8 bit unsigned raw data. If wave header present, assumes 100 byte length.",
 
     "extractWavesamples": `Remove all 6 sound chunks from a mirage disk image and write as 6 separate 
-    64KB files of 8-bit, unsigned pcm data. File names are based on image file name with a suffix indicating the sound they came from.`}
+    64KB files of 8-bit, unsigned pcm data. File names are based on image file name with a suffix indicating the 
+    sound they came from.`}
 }
 
 

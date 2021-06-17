@@ -7,7 +7,7 @@ function execute() {
     if (currentSource == null || currentDestination == null)
     {
         //pop modal warning
-        window.api.send('showWarning', "Source and Destination must be set")
+        window.api.send('showWarning', "Source and Destination directories must be set.")
         return
     }
 
@@ -17,7 +17,8 @@ function execute() {
         source : currentSource, 
         destination : currentDestination};
 
-    console.log(`telling main process to run ${command.tool} on ${command.source} and ${command.destination}`);
+    console.log(`telling main process to run ${command.tool} on source ${command.source} 
+    and destination ${command.destination}`);
     //sends data to the main process using asynchronous method in preload.js
     window.api.send('toMain', command)
 }

@@ -11,7 +11,7 @@ let mainWindow;
 const loadMainWindow = () => {
     mainWindow = new BrowserWindow({
         width : 1200,
-        height: 800,
+        height: 900,
         webPreferences: {
           nodeIntegration: false, // is default value after Electron v5
           contextIsolation: true, // protect against prototype pollution
@@ -52,12 +52,16 @@ ipcMain.on("toMain", (event, args) => {
     mainWindow.webContents.send("fromMain", tools.allTools[toolName](source, destination));
 });
 
-ipcMain.on("showWarning", (event, args) => {
+function showWarning(args) {
   let options = {
-    title : "Warning",
+    title : "I'm sorry, Dave, I'm afraid I can't do that",
     message : args
     }
   dialog.showMessageBoxSync(mainWindow, options)
+}
+
+ipcMain.on("showWarning", (event, args) => {
+  showWarning(args)
 })
 
 ipcMain.on("selectDirectory", (event, args) => {
@@ -220,3 +224,4 @@ const template = [
 
 const menu = Menu.buildFromTemplate(template)
 Menu.setApplicationMenu(menu)
+module.exports.showWarning = showWarning

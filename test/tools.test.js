@@ -31,8 +31,8 @@ test('read file', () => {
 test('getFileList', () => {
   let list = code.getFileList(".")
   console.log(list)
-  //19 files and directories in root of project
-  expect(list.length).toBe(20)
+  //22 files and directories in root of project
+  expect(list.length).toBe(22)
 });
 
 test('convert32_to_8bit', () => {
