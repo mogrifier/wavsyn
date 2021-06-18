@@ -10,7 +10,7 @@
 </head>
 
 <body>
-    <main role="main" class="container">
+    <main role="main" class="container-xl">
     <h2 class="blog-post-title">Wavsyn - Tools for creating Mirage Disk Images</h2>
     <h6 class="pb-3 mb-4 font-italic border-bottom">
         Wavsyn is using Node.js <span id="node-version"></span>,
@@ -30,7 +30,7 @@
       <tr>
         <td>Choose the Source Folder for the process</td>
         <td><input type = "button" onclick = "selectSource()" value = "Source"></td>
-        <td><input id="currentSource" type = "textfield" editable="false" size = "50" value = ""></td>
+        <td><input id="currentSource" type = "textfield" editable="false" size = "75" value = ""></td>
       </tr>
       <tr>
         <td>Choose a process to run</td>
@@ -39,35 +39,56 @@
             </select></td>
         <td></td>
       </tr>
-      <tr>
+      <tr style="height: 80px;" align="top">
           <!-- this has default value. better to auto initialize in preload-->
         <td id="functionHelp" colspan="3" bgcolor="yellow">Convert 32 bit float files to 8 bit</td>
       </tr>
       <tr>
         <td>Choose the Destination Folder for the process</td>
         <td><input type = "button" onclick = "selectDestination()" value = "Destination"></td>
-        <td><input id="currentDestination" type = "textfield" editable="false" size = "50" value = ""></td>
+        <td><input id="currentDestination" type = "textfield" editable="false" size = "75" value = ""></td>
       </tr>
     </tbody>
   </table>
-
-<input type = "button" onclick = "execute()" value = "Run Process">  
-<br>
 </div>
 <div>
-Output Window:<br>
-<textarea id="logs" name="logs" rows = "12" cols="120" ></textarea>
-
+<table id="outputs" class="table">
+  <colgroup>
+    <col style="width:50%">
+    <col style="width:50%">
+  </colgroup> 
+<thead class="thead-dark">
+  <tr>
+    <th>Run a Step</th>
+    <th>Run a Workflow</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+<td>
+  <input type = "button" onclick = "execute()" value = "Run Process">  
+</td>
+<td>
+  <input type = "button" onclick = "addWorkflowStep()" value = "Add Step">
+  &nbsp;  &nbsp;
+  <input type = "button" onclick = "runWorkflow()" value = "Run Workflow">  
+</td>
+  </tr>
+<tr>
+  <td><textarea id="logs" name="logs" rows = "12" cols="70" >logs</textarea></td>
+  <td>put workflow stuff here</td>
+</tr>
+</tbody>
+</table>
 </div>
 </main>
-
 <footer class="blog-footer">
     <div class="container text-center">
 <small class="d-block mb-3 text-muted">Wavsyn © 2021 by Erich Izdepski</small>
 </div>
 </footer>
 <!-- internal variable set by preload.js-->
-<input id="helpJSON" hidden="true"  type = "textfield" value = "wtf">
+<input id="helpJSON" hidden="true"  type = "textfield" value = "">
 </body>
 
 </html>
