@@ -30,7 +30,7 @@
       <tr>
         <td>Choose the Source Folder for the process</td>
         <td><input type = "button" onclick = "selectSource()" value = "Source"></td>
-        <td><input id="currentSource" type = "textfield" editable="false" size = "75" value = ""></td>
+        <td><input id="currentSource" type = "textfield" readonly size = "75" value = ""></td>
       </tr>
       <tr>
         <td>Choose a process to run</td>
@@ -46,7 +46,7 @@
       <tr>
         <td>Choose the Destination Folder for the process</td>
         <td><input type = "button" onclick = "selectDestination()" value = "Destination"></td>
-        <td><input id="currentDestination" type = "textfield" editable="false" size = "75" value = ""></td>
+        <td><input id="currentDestination" type = "textfield" readonly size = "75" value = ""></td>
       </tr>
     </tbody>
   </table>
@@ -75,7 +75,7 @@
 </td>
   </tr>
 <tr>
-  <td><textarea id="logs" name="logs" rows = "12" cols="70" >logs</textarea></td>
+  <td><textarea id="logs" name="logs" rows = "12" cols="70" readonly>logs</textarea></td>
   <td>put workflow stuff here</td>
 </tr>
 </tbody>

@@ -1,6 +1,7 @@
 const path = require ("path")
 const fs = require ("fs")
-//const {main} = require("../../main.js")
+const { exec } = require('child_process')
+const {dialog} = require('electron');
 
 //Global variables
 var WAVHEADER = 44
@@ -43,8 +44,44 @@ var allTools = {
         }
         return logString
     },
+
     convert_to_hfe: function (source, destination) {
         console.log("running convert_to_hfe")
+        //msg is the child_process object. arguments go in the brackets, callback is last
+
+/** will need to call each process separately for all source file (must be extension edm,
+ * but could rename img to edm)
+ * hxcfe -finput:./hxc_source/analog.edm -foutput:analog.hfe -conv -ifmode:GENERIC_SHUGART_DD_FLOPPYMODE
+ * 
+ * can't figure out how to make work on a folder
+ * 
+ */
+
+        var command = "hxcfe -finput:" + source  +"\\analog.edm -foutput:" + destination + "\\analog.hfe -conv -ifmode:GENERIC_SHUGART_DD_FLOPPYMODE"
+        //var msg = exec("hxcfe -finput:${source}\\analog.edm -foutput:${destination}\\analog.hfe -conv -ifmode:GENERIC_SHUGART_DD_FLOPPYMODE")
+        console.log(command)
+        var msg = exec(command)
+
+        msg.stdout.on('data', (data) => {
+            console.log(`stdout: ${data}`);
+          });
+
+        //I tried to cause error but it just didn't process if it couldn't find input file
+        msg.stderr.on('data', (data) => {
+            console.log(`stderr: ${data}`);
+            //I could not call method in the main.js to do this- circularity error. 
+            let options = {
+                title : "I'm sorry, Dave, I'm afraid I can't do that",
+                message : data
+                }
+                //This is NOT optimal, since not modal.
+              dialog.showMessageBoxSync(options)
+        });
+
+
+        //read source and desitnation and see if the process worked or not
+
+          //if processes with no errors then read destination direwctory to see what got written and log that to screen
         return "hfe conversion complete"
     },
 
@@ -132,16 +169,16 @@ var allTools = {
                     }
                 }
             }
-            // save the new disk image, named after the wave data file. extension img is equivalent to edm.
-            code.writeFile(newImage, name_stub + ".img", destination)
-            logString[index++] = `wrote mirage image ${name_stub + ".img"} to ${destination}\n`
+            // save the new disk image, named after the wave data file. Using edm since hxcfe requires that.
+            code.writeFile(newImage, name_stub + ".edm", destination)
+            logString[index++] = `wrote mirage image ${name_stub + ".edm"} to ${destination}\n`
         }
         return logString
     },
 
 
     help: {"writeDiskImage":`Write a mirage disk image from 384KB source audio files. Files must be unsigned 8 bit,
-     mono, PCM. The wave header will be removed if present. This creates a 440KB disk image file for use with 
+     mono, PCM. The wave header will be removed if present. This creates a 440KB disk image file (extensioon .edm) for use with 
     Omniflop or conversion to HFE. See the Software menu to download additional tools.`, 
 
     "convert_to_hfe":`Convert a disk image to hfe. You need to have HxCFloppyEmulator installed AND on your PATH. 
@@ -255,7 +292,7 @@ var code = {
         else {
             return false
         }
-    }
+    },
 }
 
 //end of internal namespace

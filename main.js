@@ -16,6 +16,7 @@ const loadMainWindow = () => {
           nodeIntegration: false, // is default value after Electron v5
           contextIsolation: true, // protect against prototype pollution
           enableRemoteModule: false, // turn off remote
+          webviewTag: true, //for tabs
           preload: path.join(__dirname, 'app/preload/preload.js')
         }
     });
@@ -224,4 +225,3 @@ const template = [
 
 const menu = Menu.buildFromTemplate(template)
 Menu.setApplicationMenu(menu)
-module.exports.showWarning = showWarning
