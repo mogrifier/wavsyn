@@ -56,33 +56,54 @@ var allTools = {
  * can't figure out how to make work on a folder
  * 
  */
+        var logString = new Array()
+        var index = 0
+        let allFiles = code.getFileList(source)
 
-        var command = "hxcfe -finput:" + source  +"\\analog.edm -foutput:" + destination + "\\analog.hfe -conv -ifmode:GENERIC_SHUGART_DD_FLOPPYMODE"
-        //var msg = exec("hxcfe -finput:${source}\\analog.edm -foutput:${destination}\\analog.hfe -conv -ifmode:GENERIC_SHUGART_DD_FLOPPYMODE")
-        console.log(command)
-        var msg = exec(command)
+        let goodFiles = new Array()
+        for (const fileName of allFiles) {
+            //only allow files that end in edm and have have no spaces in them
+            if (fileName.endsWith('.edm') && fileName.indexOf(' ') < 0) {
+                goodFiles.push(fileName)
+            }
+            else {
+                //skip
+                logString[index++] = `skipping ${fileName} since not a .edm file or contains spaces in the file name\n`
+            }
+        }
 
-        msg.stdout.on('data', (data) => {
-            console.log(`stdout: ${data}`);
-          });
+        for (const fileName of goodFiles) {
+            if (fileName.endsWith('.edm')) {
 
-        //I tried to cause error but it just didn't process if it couldn't find input file
-        msg.stderr.on('data', (data) => {
-            console.log(`stderr: ${data}`);
-            //I could not call method in the main.js to do this- circularity error. 
-            let options = {
-                title : "I'm sorry, Dave, I'm afraid I can't do that",
-                message : data
-                }
-                //This is NOT optimal, since not modal.
-              dialog.showMessageBoxSync(options)
-        });
+                //will not process filenames with spaces. tried single quotes and did not work, even though does in powershell.
+                let command = "hxcfe -finput:" + source  + path.sep + fileName + " -foutput:" 
+                    + destination + path.sep + path.parse(fileName).name + ".hfe"
+                    + " -conv -ifmode:GENERIC_SHUGART_DD_FLOPPYMODE"
+                //var msg = exec("hxcfe -finput:${source}\\analog.edm -foutput:${destination}\\analog.hfe -conv -ifmode:GENERIC_SHUGART_DD_FLOPPYMODE")
+                console.log(command)
+                let msg = exec(command)
 
+                msg.stdout.on('data', (data) => {
+                    console.log(`stdout: ${data}`);
+                });
 
-        //read source and desitnation and see if the process worked or not
+                //I tried to cause error but it just didn't process if it couldn't find input file
+                msg.stderr.on('data', (data) => {
+                    console.log(`stderr: ${data}`);
+                    //I could not call method in the main.js to do this- circularity error. 
+                    let options = {
+                        title : "I'm sorry, Dave, I'm afraid I can't do that",
+                        message : data
+                        }
+                        //This is NOT optimal, since not modal.
+                    dialog.showMessageBoxSync(options)
+                });
 
-          //if processes with no errors then read destination direwctory to see what got written and log that to screen
-        return "hfe conversion complete"
+                logString[index++] = `converting ${fileName} to hfe\n`
+        }
+    }
+        logString[index++] = "hfe conversion complete"
+        return logString
     },
 
     /**This will extract the data from a mirage disk image (original, not hfe) in source

@@ -44,9 +44,7 @@
     "jest": "^27.0.3"
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0",
-    "electron-tabs": "^0.15.0",
-    "lookpath": "^1.2.1"
+    "electron-squirrel-startup": "^1.0.0"
   },
   "config": {
     "forge": {

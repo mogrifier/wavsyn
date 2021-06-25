@@ -16,7 +16,6 @@ const loadMainWindow = () => {
           nodeIntegration: false, // is default value after Electron v5
           contextIsolation: true, // protect against prototype pollution
           enableRemoteModule: false, // turn off remote
-          webviewTag: true, //for tabs
           preload: path.join(__dirname, 'app/preload/preload.js')
         }
     });
@@ -70,7 +69,8 @@ ipcMain.on("selectDirectory", (event, args) => {
 
     let options = {
       title : "Open location for processing", 
-      //defaultPath : "D:\\electron-app",
+      //just show all files so user is not confued by empty directory
+      filters : [{name : 'All Files', extensions: ['*']}],
       buttonLabel : "Choose Location",
       properties: ['openDirectory']
       }
@@ -124,11 +124,6 @@ const template = [
   {
     label: 'File',
     submenu: [
-      { label: 'test menu', 
-      click() { 
-        shell.openExternal('http://coinmarketcap.com')
-    } 
-     },
       (isMac ? { role: 'close' } : { role: 'quit' }),
     ]
   },
@@ -182,6 +177,18 @@ const template = [
   {
     label: 'Window',
     submenu: [
+      { label: 'Wavsyn', 
+      click() { 
+        //load main view (which is also default)
+        mainWindow.loadFile(path.join(__dirname, "index.html"));
+    } 
+     },
+     { label: 'Editor', 
+      click() { 
+        //load editor html file
+        mainWindow.loadFile(path.join(__dirname, "/app/pages/editor.html"));
+
+    }},
       { role: 'minimize' },
       { role: 'zoom' },
       ...(isMac ? [
