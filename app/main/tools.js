@@ -73,35 +73,33 @@ var allTools = {
         }
 
         for (const fileName of goodFiles) {
-            if (fileName.endsWith('.edm')) {
+            //will not process filenames with spaces. tried single quotes and did not work, even though does in powershell.
+            let command = "hxcfe -finput:" + source  + path.sep + fileName + " -foutput:" 
+                + destination + path.sep + path.parse(fileName).name + ".hfe"
+                + " -conv -ifmode:GENERIC_SHUGART_DD_FLOPPYMODE"
+            //var msg = exec("hxcfe -finput:${source}\\analog.edm -foutput:${destination}\\analog.hfe -conv -ifmode:GENERIC_SHUGART_DD_FLOPPYMODE")
+            console.log(command)
+            let msg = exec(command)
 
-                //will not process filenames with spaces. tried single quotes and did not work, even though does in powershell.
-                let command = "hxcfe -finput:" + source  + path.sep + fileName + " -foutput:" 
-                    + destination + path.sep + path.parse(fileName).name + ".hfe"
-                    + " -conv -ifmode:GENERIC_SHUGART_DD_FLOPPYMODE"
-                //var msg = exec("hxcfe -finput:${source}\\analog.edm -foutput:${destination}\\analog.hfe -conv -ifmode:GENERIC_SHUGART_DD_FLOPPYMODE")
-                console.log(command)
-                let msg = exec(command)
+            msg.stdout.on('data', (data) => {
+                console.log(`stdout: ${data}`);
+            });
 
-                msg.stdout.on('data', (data) => {
-                    console.log(`stdout: ${data}`);
-                });
+            //I tried to cause error but it just didn't process if it couldn't find input file
+            msg.stderr.on('data', (data) => {
+                console.log(`stderr: ${data}`);
+                //I could not call method in the main.js to do this- circularity error. 
+                let options = {
+                    title : "I'm sorry, Dave, I'm afraid I can't do that",
+                    message : data
+                    }
+                    //This is NOT optimal, since not modal.
+                dialog.showMessageBoxSync(options)
+            });
 
-                //I tried to cause error but it just didn't process if it couldn't find input file
-                msg.stderr.on('data', (data) => {
-                    console.log(`stderr: ${data}`);
-                    //I could not call method in the main.js to do this- circularity error. 
-                    let options = {
-                        title : "I'm sorry, Dave, I'm afraid I can't do that",
-                        message : data
-                        }
-                        //This is NOT optimal, since not modal.
-                    dialog.showMessageBoxSync(options)
-                });
-
-                logString[index++] = `converting ${fileName} to hfe\n`
+            logString[index++] = `converting ${fileName} to hfe\n`
         }
-    }
+    
         logString[index++] = "hfe conversion complete"
         return logString
     },

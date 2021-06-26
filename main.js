@@ -54,7 +54,7 @@ ipcMain.on("toMain", (event, args) => {
 
 function showWarning(args) {
   let options = {
-    title : "I'm sorry, Dave, I'm afraid I can't do that",
+    title : "I'm sorry, Dave, I'm afraid I can't do that.",
     message : args
     }
   dialog.showMessageBoxSync(mainWindow, options)
