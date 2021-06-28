@@ -23,6 +23,30 @@ const loadMainWindow = () => {
     mainWindow.loadFile(path.join(__dirname, "index.html"));
 }
 
+//for the Mac OS About menu
+app.setAboutPanelOptions({
+  applicationName: "Wavsyn",
+  applicationVersion: "Version",
+  version: app.getVersion(),
+  credits: "Developed by Erich izdepski",
+  copyright: "Copyright 2021"
+});
+
+//for the help menu item 'about'
+function aboutWavsyn() {
+  var aboutMessage = `Wavsyn, Version (${app.getVersion()}) Developed by Erich izdepski, Copyright 2021
+    Chrome Version ${process.versions['chrome']} 
+    Node Version ${process.versions['node']}
+    Electron Version ${process.versions['electron']}`
+
+  let options = {
+    title : "Wavsyn Environment Details",
+    message : aboutMessage
+    }
+  dialog.showMessageBoxSync(mainWindow, options)
+}
+
+
 //on ready event call loadMainWindow
 app.whenReady().then(() => {
     loadMainWindow();
@@ -59,6 +83,8 @@ function showWarning(args) {
     }
   dialog.showMessageBoxSync(mainWindow, options)
 }
+
+
 
 ipcMain.on("showWarning", (event, args) => {
   showWarning(args)
@@ -220,10 +246,21 @@ const template = [
     role: 'help',
     submenu: [
       {
-        label: 'Learn More',
-        click: async () => {
-          const { shell } = require('electron')
-          await shell.openExternal('https://electronjs.org')
+        label: 'Wavsyn on Github',
+        click() {
+          shell.openExternal('https://github.com/mogrifier/wavsyn')
+        }
+      },
+      {
+        label: 'Developer Blog',
+        click() {
+          shell.openExternal('https://erichizdepski.wordpress.com')
+        }
+      },
+      {
+        label: 'About',
+        click() {
+          aboutWavsyn()
         }
       }
     ]
