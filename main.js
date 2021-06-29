@@ -2,7 +2,7 @@ const { app, BrowserWindow, ipcMain, Menu, dialog } = require("electron");
 const path = require("path");
 const shell = require('electron').shell
 const isMac = process.platform === 'darwin'
-
+const midi = require('midi')
 
 var tools = require('./app/main/tools')
 
@@ -62,6 +62,120 @@ function showWarning(args) {
 
 ipcMain.on("showWarning", (event, args) => {
   showWarning(args)
+})
+
+
+ipcMain.on("getProgramDump", (event, args) => {
+
+  // Set up a new output.
+  const output = new midi.Output();
+  const input = new midi.Input();
+
+  // Configure a callback.
+input.on('message', (deltaTime, message) => {
+  // The message is an array of numbers corresponding to the MIDI bytes:
+  //   [status, data1, data2]
+  // https://www.cs.cf.ac.uk/Dave/Multimedia/node158.html has some helpful
+  // information interpreting the messages.
+  console.log(`m: ${message} d: ${deltaTime}`);
+
+  input.closePort()
+});
+
+//HACK 2 is code for Mirage on system Open the first available input port.
+input.openPort(1);
+//turn on listening for sysex messages (ignores timing and active sensing)
+input.ignoreTypes(false, true, true);
+
+var ports = input.getPortCount();
+for (var i =0; i < ports; i++) {
+  console.log(`input ports ${input.getPortName(i)}`)
+}
+
+  // Count the available output ports.
+   ports = output.getPortCount();
+  for (i =0; i < ports; i++) {
+    console.log(`output ports ${output.getPortName(i)}`)
+
+
+    
+    /**
+     * Microsoft GS Wavetable Synth 0
+      Express  128: Port 1 1
+      Express  128: Port 2 2
+      Express  128: Port 3 3
+      Express  128: Port 4 4
+      Express  128: Port 5 5
+      Express  128: Port 6 6
+      Express  128: Port 7 7
+      Express  128: Port 8 8
+      UFX1604 MIDI 1 9
+     */
+}
+
+
+//FIXME hardcode Open the Mirage port.
+output.openPort(2);
+
+//get a wavesample dump: F0 0F 01 04 F7   65544 bytes. why?  655536 is the data- must be sysex headers
+//get a program dump: F0 0F 01 13 F7
+//get a config dump: F0 0F 01 00 F7
+/**
+ * F0 0F 01 02
+ * 00 00 02 03 02 00 0E 01 00 04 00 00 02 02 00 0A 00 00 00 03 00 00 01 00 00 00 00 00
+ * 01 00 00 00 00 00 0F 0F 0F 0E 00 00 00 00 01 00 00 00 0F 0F 01 00 00 00 00 00 00 02 00 00 F7 
+ * 
+ * made changes and saved the config to a disk
+ * F0 0F 01 02 
+ * 00 00 02 03 0C 00 02 01 00 04 00 00 07 03 0E 00 00 00 00 03 00 00 01 00 00 00 00 00 
+ * 01 00 00 00 00 00 0F 0F 0F 0E 00 00 00 00 01 00 00 00 0F 0F 01 00 00 00 00 00 00 02 00 00 F7 
+ */
+
+//load a sound: F0 0F 01 01 10 02 0a 7f F7
+/** read a parameter: f0 0f 01 01 0c 03 07 0d 7f f7   - crazy. 0c means parameter number follows. Comes as two bytes. 03 07 = 37
+0d means return the value of the parameter.
+returned F0 0F 01 0D 00 25 00 0A F7 . 00 25 - this is hex for 37. So decimal one way, hex the other. Value is 00 0A.
+Mirage reads 40 (max resonance. Internal value max is 160, by the way.)
+These are nibbles sent in LS MS order. Reverse them to create a byte. value is 160, which corresponds to a 40 on mirage display.
+
+I sent param 40 to 1.6. Read it. Got: F0 0F 01 0D 00 28 00 01 F7.. 00 28 is forty. (I guess the 00 is a spare since not needed).
+value was 00 01. revers. 01 00. = 16.
+
+setting a value.
+f0 0f 01 01 0c 04 00 0d 0F 7f f7   to set param 40 to value 15 (note I am back to using hex. These commands only have 5 bytes.)
+returned: F0 0F 01 0D 00 28 0F 00 F7   0F 00 reverse is 15!!
+
+
+*/
+
+
+//show value on mirage display: f0 0f 01 01 0c 03 07 0d 7f f7  (shows value of 37.)
+
+//change a parameter: F0 0F 01 01 0c 25 0d 09 7f F7
+//set up arrow: F0 0F 01 01 0e 7f F7  and got this: F0 0F 01 0D 03 25 04 00 F7
+
+//I pressed up arrao to change value of param 37 and giot this back: F0 0F 01 0D 02 25 0C 00 F7 
+// od 02 means value was 2. 25 0c looks like 37 (hex 25 is 37) and 0c is parameter number. 
+
+//240, 15, 1, 19, 247   F0 0F 01 13 F7 
+//tells mirage to switch to param 37 :  f0 0f 01 01 0c 03 07 7f f7
+//return value from a param: f0 0f 01 01 0c 03 07 0d 7f f7
+var getDump = [240, 15, 1, 1, 12, 3, 7, 13, 127 , 247]
+  if (args) {
+    //get lower dump
+    output.sendMessage(getDump)
+
+
+    output.closePort();
+  }
+  else {
+    //get upper dump
+
+  }
+
+  // Close the port when done.
+  output.closePort();
+
 })
 
 ipcMain.on("selectDirectory", (event, args) => {

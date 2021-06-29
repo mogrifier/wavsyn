@@ -44,7 +44,10 @@
     "jest": "^27.0.3"
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0"
+    "easymidi": "^2.0.5",
+    "electron-squirrel-startup": "^1.0.0",
+    "midi": "^1.0.4",
+    "nan": "^2.14.2"
   },
   "config": {
     "forge": {

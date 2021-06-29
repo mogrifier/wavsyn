@@ -16,3 +16,11 @@ function update(label) {
     document.getElementById(label + "_display").value = hexStr
 }
 
+function getProgramDump(lower) {
+    //send sysex command to the Mirage to get a program dump (upper or lower)
+    //if lower = true, get a lower program dump of 3 programs
+     window.api.send('getProgramDump', lower)
+
+
+}
+
