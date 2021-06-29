@@ -17,6 +17,7 @@ var allTools = {
         //read files into buffers and process using function below
         let allFiles = code.getFileList(source)
         let index = 0
+        logString[index++] = "**Converting 32bit to 8 bit files**"
         for (const fileName of allFiles){
             console.log (`converting ${fileName} to 8-bit`)
             let data32 = code.readFileBytes(fileName, source)
@@ -24,7 +25,7 @@ var allTools = {
             let data8 = code.convert_32bf_to_8bit(code.removeWaveHeader(data32, 100))
             //write new data to a file
             code.writeFile(data8, "8bit_" + fileName, destination)
-            logString[index++] = `converting ${fileName} to 8-bit\n`
+            logString[index++] = `converting ${fileName} to 8-bit`
         }
         return logString
     },
@@ -33,6 +34,7 @@ var allTools = {
         //read files into buffers and process using function below
         let allFiles = code.getFileList(source)
         let index = 0
+        logString[index++] = "**Converting 16bit to 8 bit files**"
         for (const fileName of allFiles){
             console.log (`converting ${fileName} to 8-bit`)
             let data16 = code.readFileBytes(fileName, source)
@@ -40,7 +42,7 @@ var allTools = {
             let data8 = code.convert_16b_to_8bit(code.removeWaveHeader(data16))
             //write new data to a file
             code.writeFile(data8, "8bit_" + fileName, destination)
-            logString[index++] = `converting ${fileName} to 8-bit\n`
+            logString[index++] = `converting ${fileName} to 8-bit`
         }
         return logString
     },
@@ -58,6 +60,7 @@ var allTools = {
  */
         var logString = new Array()
         var index = 0
+        logString[index++] = "**Converting .edm to .hfe files**"
         let allFiles = code.getFileList(source)
 
         let goodFiles = new Array()
@@ -68,7 +71,7 @@ var allTools = {
             }
             else {
                 //skip
-                logString[index++] = `skipping ${fileName} since not a .edm file or contains spaces in the file name\n`
+                logString[index++] = `skipping ${fileName} since not a .edm file or contains spaces in the file name`
             }
         }
 
@@ -97,7 +100,7 @@ var allTools = {
                 dialog.showMessageBoxSync(options)
             });
 
-            logString[index++] = `converting ${fileName} to hfe\n`
+            logString[index++] = `converting ${fileName} to hfe`
         }
     
         logString[index++] = "hfe conversion complete"
@@ -111,7 +114,12 @@ var allTools = {
     extractWavesamples: function (source, destination) {
         //read files into buffers and process using function below
         let allFiles = code.getFileList(source)
+        var logString = new Array()
+        var index = 0
+        logString[index++] = "**Reading samples from Mirage disk images**"
+
         for (const fileName of allFiles){
+            logString[index++] = `processing file ${fileName}`
             /** create six separate arrays of binary data, each initially 72704 bytes.
             This contains the 64KB wavesample plus extra 512 byte sectors
             and initial 1024 byte parameter data to be removed. */
@@ -145,6 +153,8 @@ var allTools = {
                 code.writeFile(wavesample, soundName, destination)
             })
         }
+        logString[index++] = "sample extraction complete"
+        return logString
     },
 
     // Reads files from source and writes to a mirage disk image format in destination
@@ -156,13 +166,14 @@ var allTools = {
         var template = code.readFileBytes(TEMPLATE, "./app/assets")
         var logString = new Array()
         var index = 0
+        logString[index++] = "**Writing disk images (.edm) files**"
         let allFiles = code.getFileList(source)
         for (const fileName of allFiles){
             var name_stub = path.parse(fileName).name
             var wavesamples = code.readFileBytes(fileName, source)
             wavesamples = code.removeWaveHeader(wavesamples)
             if (wavesamples.length != MIRAGESOUNDS) {
-                logString[index++] = `skipping file ${fileName} since it does not contain ${MIRAGESOUNDS} bytes as required\n`
+                logString[index++] = `skipping file ${fileName} since it does not contain ${MIRAGESOUNDS} bytes as required`
                 continue
             }
             var newImage = Buffer.alloc(template.byteLength)
@@ -190,7 +201,7 @@ var allTools = {
             }
             // save the new disk image, named after the wave data file. Using edm since hxcfe requires that.
             code.writeFile(newImage, name_stub + ".edm", destination)
-            logString[index++] = `wrote mirage image ${name_stub + ".edm"} to ${destination}\n`
+            logString[index++] = `wrote mirage image ${name_stub + ".edm"} to ${destination}`
         }
         return logString
     },

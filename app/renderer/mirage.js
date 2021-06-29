@@ -26,7 +26,10 @@ function execute() {
 //receives callback from the main process
 window.api.receive('fromMain', (event, arg) => {
     //write response to the logs textarea
-    document.getElementById("logs").value += arg
+    //document.getElementById("logs").value += arg
+    showUserLogs(arg)
+    //save the logs 
+    saveLogs(arg)
 })
 
 function selectDestination() {
@@ -38,6 +41,13 @@ function selectDestination() {
 function selectSource() {
     //Synchronous
     window.api.send('selectDirectory','source')
+}
+
+function saveLogs() {
+    //Synchronous
+    //read text area 
+    let logs = document.getElementById("logs").value
+    window.api.send('saveLogs', logs)
 }
 
 //name is the selected function name. will be a help JSON key
@@ -62,11 +72,8 @@ window.api.receive('selectDirectory', (event, arg) => {
             currentDestination = arg[1]
             document.getElementById("currentDestination").value = currentDestination 
         }
-        //write response to the logs textarea
-        for (var i = 0; i < arg.length; i++) { 
-            console.log(arg[i])
-            document.getElementById("logs").value += (arg[i] + '\r\n')
-        }
+        //write selected directory and source or destination to the logs textarea
+        showUserLogs(arg)
     }
     else{
         //must be cancelled or error message
@@ -74,3 +81,11 @@ window.api.receive('selectDirectory', (event, arg) => {
         document.getElementById("logs").value += arg
     }
 })
+
+
+function showUserLogs(theLogs) {
+    for (var i = 0; i < theLogs.length; i++) { 
+        console.log(theLogs[i])
+        document.getElementById("logs").value += ('\r\n' + theLogs[i])
+    }
+}

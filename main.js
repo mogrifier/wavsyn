@@ -3,6 +3,8 @@ const path = require("path");
 const shell = require('electron').shell
 const isMac = process.platform === 'darwin'
 const midi = require('midi')
+const logger = require('electron-log');
+const userLog = logger.scope('user');
 
 var tools = require('./app/main/tools')
 
@@ -84,12 +86,14 @@ function showWarning(args) {
   dialog.showMessageBoxSync(mainWindow, options)
 }
 
-
-
 ipcMain.on("showWarning", (event, args) => {
   showWarning(args)
 })
 
+ipcMain.on("saveLogs", (event, args) => {
+  //the args variable contains the latest text area output. save to a file. it appends.
+  userLog.info(args)
+});
 
 ipcMain.on("getProgramDump", (event, args) => {
 
@@ -366,7 +370,13 @@ const template = [
         }
       },
       {
-        label: 'Developer Blog',
+        label: 'Manual',
+        click() {
+          shell.openExternal('https://github.com/mogrifier/wavsyn/wiki')
+        }
+      },
+      {
+        label: "Erich's Blog",
         click() {
           shell.openExternal('https://erichizdepski.wordpress.com')
         }

@@ -33,7 +33,7 @@ contextBridge.exposeInMainWorld(
     "api", {
         send: (channel, data) => {
             // whitelist channels
-            let validChannels = ["toMain", "selectDirectory", "showWarning", "getProgramDump"];
+            let validChannels = ["toMain", "selectDirectory", "showWarning", "getProgramDump", "saveLogs"];
             if (validChannels.includes(channel)) {
                 ipcRenderer.send(channel, data);
                 console.log(`in method send; sending ${data} to channel ${channel}`);

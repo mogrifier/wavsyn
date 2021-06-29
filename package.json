@@ -45,6 +45,7 @@
   },
   "dependencies": {
     "easymidi": "^2.0.5",
+    "electron-log": "^4.3.5",
     "electron-squirrel-startup": "^1.0.0",
     "midi": "^1.0.4",
     "nan": "^2.14.2"
