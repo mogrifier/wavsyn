@@ -2,15 +2,6 @@
 var tools = require('../main/tools')
 
 window.addEventListener('DOMContentLoaded', () => {
-    const replaceText = (selector, text) => {
-      const element = document.getElementById(selector)
-      if (element) element.innerText = text
-    }
-  
-    for (const dependency of ['chrome', 'node', 'electron']) {
-      replaceText(`${dependency}-version`, process.versions[dependency])
-    }
-
     //dynamically replace contents of the dropdown box containing the function list
     for (const toolName in tools.allTools) {
       //Create and append select list
