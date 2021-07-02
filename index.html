@@ -11,7 +11,7 @@
 
 <body>
     <main role="main" class="container-xl">
-<table id="t" class="table">
+<table id="t" class="table table-sm">
     <thead class="thead-dark">
       <tr>
         <th>Steps</th>
@@ -22,7 +22,7 @@
     <tbody>
       <tr>
         <td>Choose the Source Folder for the process</td>
-        <td><input type = "button" onclick = "selectSource()" value = "Source"></td>
+        <td><input type = "button" class="btn btn-primary" onclick = "selectSource()" value = "Source"></td>
         <td><input id="currentSource" type = "textfield" readonly size = "75" value = ""></td>
       </tr>
       <tr>
@@ -38,14 +38,14 @@
       </tr>
       <tr>
         <td>Choose the Destination Folder for the process</td>
-        <td><input type = "button" onclick = "selectDestination()" value = "Destination"></td>
+        <td><input type = "button"  class="btn btn-primary" onclick = "selectDestination()" value = "Destination"></td>
         <td><input id="currentDestination" type = "textfield" readonly size = "75" value = ""></td>
       </tr>
     </tbody>
   </table>
 </div>
 <div>
-<table id="outputs" class="table">
+<table id="outputs" class="table table-sm">
   <colgroup>
     <col style="width:50%">
     <col style="width:50%">
@@ -59,16 +59,16 @@
 <tbody>
   <tr>
 <td>
-  <input type = "button" onclick = "execute()" value = "Run Process">  
+  <input type = "button" onclick = "execute()" class="btn btn-success" value = "Run Process">  
 </td>
 <td>
-  <input type = "button" onclick = "addWorkflowStep()" value = "Add Step">
+  <input type = "button" class="btn btn-secondary" onclick = "addWorkflowStep()" value = "Add Step">
   &nbsp;  &nbsp;
-  <input type = "button" onclick = "runWorkflow()" value = "Run Workflow">  
+  <input type = "button" class="btn btn-primary"  onclick = "runWorkflow()" value = "Run Workflow">  
 </td>
   </tr>
 <tr>
-  <td><textarea id="logs" name="logs" rows = "12" cols="70" readonly>logs</textarea></td>
+  <td><textarea id="logs" name="logs" rows = "15" cols="70" readonly>logs</textarea></td>
   <td>put workflow stuff here</td>
 </tr>
 </tbody>

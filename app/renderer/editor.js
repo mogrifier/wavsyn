@@ -48,7 +48,7 @@ function setSound() {
 
     //reset dirty flag warning
     var flag = document.getElementById("dirty")
-    flag.style.color = "green";
+    flag.style.color = "green"
     flag.value = "No changes yet"
     dirty = false
 }
