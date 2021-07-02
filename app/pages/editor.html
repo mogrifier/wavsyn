@@ -10,6 +10,44 @@
 <body>
     <main role="main" class="container-xl">
         Mirage Program Editor
+<table id="t" class="table">
+    <tr>
+        <td><input type = "button" onclick = "configureMidi()" value = "Configure MIDI"></td>
+        <td>Choose MIDI IN<!-- preload these--></td>
+        <td><select name="midi_in" id="midi_in" class="custom-select" onchange="selectMidi('in')">
+            <!-- the list of options is generated dynamically by preload.js, based on the function names in tools.js-->
+            </select>
+        </td>
+        <td>Choose MIDI OUT<!-- preload these--></td>
+        <td><select name="midi_out" id="midi_out" class="custom-select" onchange="selectMidi('out')">
+            <!-- the list of options is generated dynamically by preload.js, based on the function names in tools.js-->
+            </select>
+        </td>
+      </tr>
+
+    <tr>
+        <td><input type="textfield" id="dirty" size="20" style="color:green" value="No changes yet" readonly></td>
+        <td>Choose Sound</td>
+        <td><select name="sound" id="sound" class="custom-select" onchange="setSound()">
+            <option value="l0">Lower 1</option>
+            <option value="l1">Lower 2</option>
+            <option value="l2">Lower 3</option>
+            <option value="u0">Upper 1</option>
+            <option value="u1">Upper 2</option>
+            <option value="u2">Upper 3</option>
+            </select>
+        </td>
+        <td>Choose Program</td>
+        <td><select name="program" id="program" class="custom-select" onchange="setProgram()">
+            <option value="0">Program 1</option>
+            <option value="1">Program 2</option>
+            <option value="2">Program 3</option>
+            <option value="3">Program 4</option>
+            </select>
+        </td>
+      </tr>
+      
+</table>
 
     <table id="t" class="table">
         <thead class="thead-dark">
@@ -188,8 +226,6 @@ Why won't MIDI changes to wavetable control block affect segment control? Not a 
 Need to investigate a little. Tedious.
 
 What about same principles for a soundprocess editor? Does not look hard but have not got into the MIDI yet.
-
-
             -->
         </tbody>
     </table>
@@ -197,10 +233,6 @@ What about same principles for a soundprocess editor? Does not look hard but hav
     <br>
     test controls
     <input type="button" onclick = "getProgramDump(true)" value = "read Mirage">
-    <br>
-    <textarea id="logs" name="logs" rows = "12" cols="70" readonly></textarea>
-
-    
 </main>
     <footer class="blog-footer">
         <div class="container text-center">

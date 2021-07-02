@@ -26,11 +26,11 @@ function execute() {
 //receives callback from the main process
 window.api.receive('fromMain', (event, arg) => {
     //write response to the logs textarea
-    //document.getElementById("logs").value += arg
     showUserLogs(arg)
     //save the logs 
     saveLogs(arg)
 })
+
 
 function selectDestination() {
     //Synchronous

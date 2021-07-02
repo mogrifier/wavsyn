@@ -33,14 +33,14 @@ contextBridge.exposeInMainWorld(
     "api", {
         send: (channel, data) => {
             // whitelist channels
-            let validChannels = ["toMain", "selectDirectory", "showWarning", "getProgramDump", "saveLogs"];
+            let validChannels = ["toMain", "selectDirectory", "showWarning", "getProgramDump", "saveLogs", "getMidiPorts"];
             if (validChannels.includes(channel)) {
                 ipcRenderer.send(channel, data);
                 console.log(`in method send; sending ${data} to channel ${channel}`);
             }
         },
         receive: (channel, data) => {
-            let validChannels = ["fromMain", "selectDirectory"];
+            let validChannels = ["fromMain", "selectDirectory", "midiPorts"];
             if (validChannels.includes(channel)) {
               console.log(`in method receive; got ${data} from channel ${channel}`);
               // Deliberately strip event as it includes `sender` 
