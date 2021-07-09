@@ -16,7 +16,7 @@ function getMidiPorts() {
     }
 
     //add output ports
-    var output = new midi.Output();
+    const output = new midi.Output();
     ports = output.getPortCount();
     var outputList = new Array()
     for (var j = 0; j < ports; j++) {

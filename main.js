@@ -6,8 +6,14 @@ const midi = require('midi')
 const logger = require('electron-log');
 const userLog = logger.scope('user');
 
+
+//make midi in and out global
+var midiOutput
+var midiInput
+
 var tools = require('./app/main/tools')
 var midiTools = require('./app/main/midi')
+
 
 let mainWindow;
 
@@ -103,37 +109,39 @@ ipcMain.on("getMidiPorts", (event, args) => {
 });
 
 
+
+
 ipcMain.on("getProgramDump", (event, args) => {
 
     // Set up a new output.
-    const output = new midi.Output();
-    const input = new midi.Input();
+    midiOutput = new midi.Output();
+    midiInput = new midi.Input();
 
     // Configure a callback.
-  input.on('message', (deltaTime, message) => {
+    midiInput.on('message', (deltaTime, message) => {
     // The message is an array of numbers corresponding to the MIDI bytes:
     //   [status, data1, data2]
     // https://www.cs.cf.ac.uk/Dave/Multimedia/node158.html has some helpful
     // information interpreting the messages.
     console.log(`m: ${message} d: ${deltaTime}`);
 
-    input.closePort()
+    midiInput.closePort()
   });
 
   //HACK 2 is code for Mirage on system Open the first available input port.
-  input.openPort(parseInt(args["midiIn"]));
+  midiInput.openPort(parseInt(args["midiIn"]));
   //turn on listening for sysex messages (ignores timing and active sensing)
-  input.ignoreTypes(false, true, true);
+  midiInput.ignoreTypes(false, true, true);
 
-  var ports = input.getPortCount();
+  var ports = midiInput.getPortCount();
   for (var i =0; i < ports; i++) {
-    console.log(`input ports ${input.getPortName(i)}`)
+    console.log(`input ports ${midiInput.getPortName(i)}`)
   }
 
     // Count the available output ports.
-    ports = output.getPortCount();
+    ports = midiOutput.getPortCount();
     for (i =0; i < ports; i++) {
-      console.log(`output ports ${output.getPortName(i)}`)
+      console.log(`output ports ${midiOutput.getPortName(i)}`)
 
 
       
@@ -153,7 +161,7 @@ ipcMain.on("getProgramDump", (event, args) => {
 
 
   //FIXME hardcode Open the Mirage port.
-  output.openPort(parseInt(args["midiOut"]));
+  midiOutput.openPort(parseInt(args["midiOut"]));
 
   //get a wavesample dump: F0 0F 01 04 F7   65544 bytes. why?  655536 is the data- must be sysex headers
   //get a program dump: F0 0F 01 13 F7
@@ -201,8 +209,8 @@ ipcMain.on("getProgramDump", (event, args) => {
   var getDump = [240, 15, 1, 1, 12, 3, 7, 13, 127 , 247]
     if (args["isLower"]) {
       //get lower dump
-      output.sendMessage(getDump)
-      output.closePort();
+      midiOutput.sendMessage(getDump)
+      midiOutput.closePort();
     }
     else {
       //get upper dump
@@ -210,8 +218,115 @@ ipcMain.on("getProgramDump", (event, args) => {
     }
 
     // Close the port when done.
-    output.closePort();
+    midiOutput.closePort();
 })
+
+
+/**
+ * Execute mirage command to save to floppy
+ */
+ipcMain.on("saveSound", (event, args) => {
+/**data["midiIn"] = midiIn
+    data["midiOut"] = midiOut
+    data["isLower"] = isLower
+    data["sound"] = sound  */
+    let isLower = args["isLower"]
+    let sound = args["sound"]
+    var sysex = []
+    //11 is lower, 12 is upper, then sound , then enter
+    if (isLower) {
+      sysex = [1, 1, sound, 10]
+    }
+    else {
+      sysex = [1, 2, sound, 10]
+    }
+    sendSysex(args["midiIn"], args["midiOut"], sysex)
+})
+
+ipcMain.on("readParameter", (event, args) => {
+  /** data["midiIn"] = midiIn
+      data["midiOut"] = midiOut
+      data["isLower"] = isLower
+      data["sound"] = sound 
+      data["programs"] = program 
+      data["parameter"] = parameter
+      
+      send syex to Mirage to read a parameter*/
+
+      //need parameters as two digits- decimal integers
+    let d1 = parseInt(args["parameter"].charAt[0])
+    let d2 = parseInt(args["parameter"].charAt[1])
+    //the command means (12) for parameter d1d2 (13) read the value (since none is given)
+    sendSysex(args["midiIn"], args["midiOut"], [12, d1, d2, 13] )
+  })
+  
+
+/**
+ * There is no single write command. You send the number of up or down arrow commands to execute.
+ */
+
+  ipcMain.on("writeParameter", (event, args) => {
+      /**data["midiIn"] = midiIn
+          data["midiOut"] = midiOut
+          //treat parameter as two character string. parse out the integers. simplest.
+        data["parameter"] = parameter
+        data["delta"] = up or down arrows to send via sysex
+
+      down arrow: F0 0F 01 01 0f 7f F7 
+      up arrow: F0 0F 01 01 0e 7f F7 
+
+        */
+      let parameter = args["parameter"]
+      let midiIn = args["midiIn"]
+      let midiOut = args["midiOut"]
+      let d1 = parseInt(parameter.charAt(0))
+      let d2 = parseInt(parameter.charAt(1))
+      let delta = parseInt(args["delta"])
+      let selectSysex = [12, d1, d2, 13]
+      
+      midiOutput = new midi.Output();
+      midiInput = new midi.Input();
+      midiInput.openPort(parseInt(midiIn));
+      //turn on listening for sysex messages (ignores timing and active sensing)
+      midiInput.ignoreTypes(false, true, true);
+      midiOutput.openPort(parseInt(midiOut));
+
+      // Configure a callback.
+      midiInput.on('message', (deltaTime, message) => {
+        // The message is an array of numbers corresponding to the MIDI bytes:
+        //   [status, data1, data2]
+        // https://www.cs.cf.ac.uk/Dave/Multimedia/node158.html has some helpful
+        // information interpreting the messages.
+        console.log(`m: ${message} d: ${deltaTime}`);
+      });
+
+      //make command to select parameter to change f0 0f 01 01 0c 03 07  7f f7
+      var prefix = [240, 15, 1, 1]
+      var suffix = [127, 247]
+      var fullSysex = [...prefix, ...selectSysex, ...suffix]
+      //select the parameter to change
+      midiOutput.sendMessage(fullSysex)
+      //now send the right number of up and down arrows.
+      if (delta > 0) {
+        //uparrow
+        fullSysex = [...prefix, [14], ...suffix]
+      }
+      else {
+        //down arrow
+        fullSysex = [...prefix, [15], ...suffix]
+      }
+
+      //now send it
+      for (var i = 0; i < Math.abs(delta); i++) {
+        midiOutput.sendMessage(fullSysex)
+      }
+
+      //close output and input
+      midiOutput.closePort()
+      midiInput.closePort()
+    })
+
+    
 
 
 ipcMain.on("selectDirectory", (event, args) => {
@@ -251,6 +366,46 @@ ipcMain.on("selectDirectory", (event, args) => {
         mainWindow.webContents.send("selectDirectory", err);
       })
 });
+
+
+//would like it midi.js but concerned callbacks won't work 
+function sendSysex(midiIn, midiOut, sysex) {
+
+  /** read a parameter: f0 0f 01 01 0c 03 07 0d 7f f7   - crazy. 0c means parameter number follows. Comes as two bytes. 03 07 = 37
+  0d means return the value of the parameter. */
+    midiOutput = new midi.Output();
+    midiInput = new midi.Input();
+  
+    //HACK 2 is code for Mirage on system Open the first available input port.
+    midiInput.openPort(parseInt(midiIn));
+    //turn on listening for sysex messages (ignores timing and active sensing)
+    midiInput.ignoreTypes(false, true, true);
+    midiOutput.openPort(parseInt(midiOut));
+
+    // Configure a callback.
+    midiInput.on('message', (deltaTime, message) => {
+      // The message is an array of numbers corresponding to the MIDI bytes:
+      //   [status, data1, data2]
+      // https://www.cs.cf.ac.uk/Dave/Multimedia/node158.html has some helpful
+      // information interpreting the messages.
+      console.log(`m: ${message} d: ${deltaTime}`);
+  
+      midiInput.closePort()
+    });
+
+    //send command  and return value from a param: f0 0f 01 01 0c 03 07 0d 7f f7
+    var prefix = [240, 15, 1, 1]
+    var suffix = [127, 247]
+    var fullSysex = [...prefix, ...sysex, ...suffix]
+    console.log(`sending sysex ${fullSysex}`)
+    midiOutput.sendMessage(fullSysex)
+
+    //close output
+    midiOutput.closePort()
+}
+
+
+
 
 //set up custom menus
 

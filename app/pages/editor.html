@@ -10,53 +10,51 @@
 <body>
     <main role="main" class="container-xl">
         Mirage Program Editor
-<table id="t" class="table table-sm">
+<table id="control" class="table table-sm">
     <tr>
-        <td><input type = "button" onclick = "configureMidi()"   class="btn btn-primary" value="Configure MIDI"></td>
-        <td>Choose MIDI IN<!-- preload these--></td>
-        <td><select name="midi_in" id="midi_in" class="custom-select" onchange="selectMidi('in')">
+        <td width="20%"><input type = "button" onclick = "configureMidi()"   class="btn btn-primary" value="Configure MIDI"></td>
+        <td width="20%">MIDI IN<!-- preload these--></td>
+        <td width="20%"><select name="midi_in" id="midi_in" class="custom-select" onchange="selectMidi('in')">
             <!-- the list of options is generated dynamically by preload.js, based on the function names in tools.js-->
             </select>
         </td>
-        <td>Choose MIDI OUT<!-- preload these--></td>
-        <td><select name="midi_out" id="midi_out" class="custom-select" onchange="selectMidi('out')">
+        <td width="20%">MIDI OUT<!-- preload these--></td>
+        <td width="20%"><select name="midi_out" id="midi_out" class="custom-select" onchange="selectMidi('out')">
             <!-- the list of options is generated dynamically by preload.js, based on the function names in tools.js-->
             </select>
         </td>
       </tr>
 
     <tr>
-        <td class="bg-warning"><input type="textfield" id="dirty" size="20" style="color:green" value="No changes yet" readonly></td>
-        <td>Choose Sound</td>
-        <td><select name="sound" id="sound" class="custom-select" onchange="setSound()">
-            <option value="l0">Lower 1</option>
-            <option value="l1">Lower 2</option>
-            <option value="l2">Lower 3</option>
-            <option value="u0">Upper 1</option>
-            <option value="u1">Upper 2</option>
-            <option value="u2">Upper 3</option>
+        <td  width="20%" class="bg-warning"><input type="textfield" id="dirty" size="20" style="color:green" value="No changes yet" readonly></td>
+        <td  width="20%">Sound</td>
+        <td  width="20%"><select name="sound" id="sound" class="custom-select" onchange="setUISound()" disabled>
+            <option value="1">Lower 1</option>
+            <option value="2">Lower 2</option>
+            <option value="3">Lower 3</option>
+            <option value="4">Upper 1</option>
+            <option value="5">Upper 2</option>
+            <option value="6">Upper 3</option>
             </select>
         </td>
-        <td>Choose Program</td>
-        <td><select name="program" id="program" class="custom-select" onchange="setProgram()">
-            <option value="0">Program 1</option>
-            <option value="1">Program 2</option>
-            <option value="2">Program 3</option>
-            <option value="3">Program 4</option>
+        <td  width="20%">Program</td>
+        <td  width="20%"><select name="program" id="program" class="custom-select" onchange="setProgram()" disabled>
+            <option value="1">Program 1</option>
+            <option value="2">Program 2</option>
+            <option value="3">Program 3</option>
+            <option value="34">Program 4</option>
             </select>
         </td>
       </tr>
       <tr>
-          <td>Save Program</td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
+          <td  width="20%"><input type = "button" id="saveSound" onclick = "saveSound()" class="btn btn-secondary" value="Save Sound" disabled></td>
+          <td width="60%" colspan="3">Saves Mirage sound/programs to disk into the selected sound</td>
+          <td  width="20%"></td>
       </tr>
       
 </table>
 
-    <table id="t" class="table table-sm">
+    <table id="parameters" class="table table-sm">
         <thead class="thead-dark">
           <tr>
             <th colspan="3">General</th>
@@ -71,29 +69,29 @@
 
             <tr>
                 <td><label for="cutoff">Filter Cutoff Frequency</label></td>
-                <td><input type="range" id="cutoff" value="0" min="0" max="198" onchange="update('cutoff')"></td>
+                <td><input type="range" id="cutoff" value="0" min="0" max="99" onchange="update('cutoff')"></td>
                 <td><input type="textfield" id="cutoff_display" value="0" size="2" readonly></td>
                 
                 <td><label for="cutoff">Attack</label></td>
-                <td><input type="range" id="fea" value="0" min="0" max="124" onchange="update('fea')"></td>
+                <td><input type="range" id="fea" value="0" min="0" max="31" onchange="update('fea')"></td>
                 <td><input type="textfield" id="fea_display" value="0" size="2" readonly></td>
 
                 <td><label for="cutoff">Attack</label></td>
-                <td><input type="range" id="aea" value="0" min="0" max="124" onchange="update('aea')"></td>
+                <td><input type="range" id="aea" value="0" min="0" max="31" onchange="update('aea')"></td>
                 <td><input type="textfield" id="aea_display" value="0" size="2" readonly></td>
 
             </tr>
             <tr>
                 <td><label for="resonance">Filter Resonance</label></td>
-                <td><input type="range" id="resonance" value="0" min="0" max="160" onchange="update('resonance')"></td>
+                <td><input type="range" id="resonance" value="0" min="0" max="40" onchange="update('resonance')"></td>
                 <td><input type="textfield" id="resonance_display" value="0" size="2" readonly></td>
 
                 <td><label for="cutoff">Peak</label></td>
-                <td><input type="range" id="fep" value="0" min="0" max="124" onchange="update('fep')"></td>
+                <td><input type="range" id="fep" value="0" min="0" max="31" onchange="update('fep')"></td>
                 <td><input type="textfield" id="fep_display" value="0" size="2" readonly></td>
 
                 <td><label for="cutoff">Peak</label></td>
-                <td><input type="range" id="aep" value="0" min="0" max="124" onchange="update('aep')"></td>
+                <td><input type="range" id="aep" value="0" min="0" max="31" onchange="update('aep')"></td>
                 <td><input type="textfield" id="aep_display" value="0" size="2" readonly></td>
             </tr>
             <tr>
@@ -102,11 +100,11 @@
                 <td><input type="textfield" id="tracking_display" value="0" size="2" readonly></td>
 
                 <td><label for="cutoff">Decay</label></td>
-                <td><input type="range" id="fed" value="0" min="0" max="124" onchange="update('fed')"></td>
+                <td><input type="range" id="fed" value="0" min="0" max="31" onchange="update('fed')"></td>
                 <td><input type="textfield" id="fed_display" value="0" size="2" readonly></td>
 
                 <td><label for="cutoff">Decay</label></td>
-                <td><input type="range" id="aed" value="0" min="0" max="124" onchange="update('aed')"></td>
+                <td><input type="range" id="aed" value="0" min="0" max="31" onchange="update('aed')"></td>
                 <td><input type="textfield" id="aed_display" value="0" size="2" readonly></td>
             </tr>
 
@@ -116,11 +114,11 @@
                 <td> <input type="textfield" id="lfo_freq_display" value="0" size="2" readonly></td>
 
                 <td><label for="cutoff">Sustain</label></td>
-                <td><input type="range" id="fes" value="0" min="0" max="124" onchange="update('fes')"></td>
+                <td><input type="range" id="fes" value="0" min="0" max="31" onchange="update('fes')"></td>
                 <td><input type="textfield" id="fes_display" value="0" size="2" readonly></td>
 
                 <td><label for="cutoff">Sustain</label></td>
-                <td><input type="range" id="aes" value="0" min="0" max="124" onchange="update('aes')"></td>
+                <td><input type="range" id="aes" value="0" min="0" max="31" onchange="update('aes')"></td>
                 <td><input type="textfield" id="aes_display" value="0" size="2" readonly></td>
             </tr>
             <tr> 
@@ -129,11 +127,11 @@
                 <td><input type="textfield" id="lfo_depth_display" value="0" size="2" readonly></td>
 
                 <td><label for="cutoff">Release</label></td>
-                <td><input type="range" id="fer" value="0" min="0" max="124" onchange="update('fer')"></td>
+                <td><input type="range" id="fer" value="0" min="0" max="31" onchange="update('fer')"></td>
                 <td><input type="textfield" id="fer_display" value="0" size="2" readonly></td>
 
                 <td><label for="cutoff">Release</label></td>
-                <td><input type="range" id="aer" value="0" min="0" max="124" onchange="update('aer')"></td>
+                <td><input type="range" id="aer" value="0" min="0" max="31" onchange="update('aer')"></td>
                 <td><input type="textfield" id="aer_display" value="0" size="2" readonly></td>
             </tr>
 
@@ -143,37 +141,37 @@
                 <td><input type="textfield" id="osc_detune_display" value="0" size="2" readonly></td>
 
                 <td><label for="cutoff">VS Attack</label></td>
-                <td><input type="range" id="feva" value="0" min="0" max="124" onchange="update('feva')"></td>
+                <td><input type="range" id="feva" value="0" min="0" max="31" onchange="update('feva')"></td>
                 <td><input type="textfield" id="feva_display" value="0" size="2" readonly></td>
 
                 <td><label for="cutoff">VS Attack</label></td>
-                <td><input type="range" id="aeva" value="0" min="0" max="124" onchange="update('aeva')"></td>
+                <td><input type="range" id="aeva" value="0" min="0" max="31" onchange="update('aeva')"></td>
                 <td><input type="textfield" id="aeva_display" value="0" size="2" readonly></td>
             </tr>
             <tr>
                 <td><label for="osc_mix">OSC Mix</label></td>
-                <td><input type="range" id="osc_mix" value="0" min="0" max="252" onchange="update('osc_mix')"></td>
+                <td><input type="range" id="osc_mix" value="0" min="0" max="63" onchange="update('osc_mix')"></td>
                 <td><input type="textfield" id="osc_mix_display" value="0" size="2" readonly></td>
 
                 <td><label for="cutoff">VS Peak</label></td>
-                <td><input type="range" id="fevp" value="0" min="0" max="124" onchange="update('fevp')"></td>
+                <td><input type="range" id="fevp" value="0" min="0" max="31" onchange="update('fevp')"></td>
                 <td><input type="textfield" id="fevp_display" value="0" size="2" readonly></td>
 
                 <td><label for="cutoff">VS Peak</label></td>
-                <td><input type="range" id="aevp" value="0" min="0" max="124" onchange="update('aevp')"></td>
+                <td><input type="range" id="aevp" value="0" min="0" max="31" onchange="update('aevp')"></td>
                 <td><input type="textfield" id="aevp_display" value="0" size="2" readonly></td>
             </tr>
             <tr>
                 <td><label for="mix_velo">Mix VS</label></td>
-                <td><input type="range" id="mix_velo" value="0" min="0" max="124" onchange="update('mix_velo')"></td>
+                <td><input type="range" id="mix_velo" value="0" min="0" max="31" onchange="update('mix_velo')"></td>
                 <td><input type="textfield" id="mix_velo_display" value="0" size="2" readonly></td>
 
                 <td><label for="cutoff">VS Decay</label></td>
-                <td><input type="range" id="fevd" value="0" min="0" max="124" onchange="update('fevd')"></td>
+                <td><input type="range" id="fevd" value="0" min="0" max="31" onchange="update('fevd')"></td>
                 <td><input type="textfield" id="fevd_display" value="0" size="2" readonly></td>
 
                 <td><label for="cutoff">VS Decay</label></td>
-                <td><input type="range" id="aevd" value="0" min="0" max="124" onchange="update('aevd')"></td>
+                <td><input type="range" id="aevd" value="0" min="0" max="31" onchange="update('aevd')"></td>
                 <td><input type="textfield" id="aevd_display" value="0" size="2" readonly></td>
             </tr>
 
@@ -183,11 +181,11 @@
                 <td><input type="textfield" id="wavesample_display" value="0" size="2" readonly></td>
 
                 <td><label for="cutoff">VS Sustain</label></td>
-                <td><input type="range" id="fevs" value="0" min="0" max="124" onchange="update('fevs')"></td>
+                <td><input type="range" id="fevs" value="0" min="0" max="31" onchange="update('fevs')"></td>
                 <td><input type="textfield" id="fevs_display" value="0" size="2" readonly></td>
 
                 <td><label for="cutoff">VS Sustain</label></td>
-                <td><input type="range" id="aevs" value="0" min="0" max="124" onchange="update('aevs')"></td>
+                <td><input type="range" id="aevs" value="0" min="0" max="31" onchange="update('aevs')"></td>
                 <td><input type="textfield" id="aevs_display" value="0" size="2" readonly></td>
             </tr>
             <tr>    
@@ -202,11 +200,11 @@
                 </td>
                 <td></td>
                 <td><label for="cutoff">VS Release</label></td>
-                <td><input type="range" id="fevr" value="0" min="0" max="124" onchange="update('fevr')"></td>
+                <td><input type="range" id="fevr" value="0" min="0" max="31" onchange="update('fevr')"></td>
                 <td><input type="textfield" id="fevr_display" value="0" size="2" readonly></td>
 
                 <td><label for="cutoff">VS Release</label></td>
-                <td><input type="range" id="aevr" value="0" min="0" max="124" onchange="update('aevr')"></td>
+                <td><input type="range" id="aevr" value="0" min="0" max="31" onchange="update('aevr')"></td>
                 <td><input type="textfield" id="aevr_display" value="0" size="2" readonly></td>
             </tr>
 
@@ -239,7 +237,7 @@ What about same principles for a soundprocess editor? Does not look hard but hav
     VS = Velecity Sensitivity
     <br>
     test controls
-    <input type="button" onclick = "getProgramDump(true)" value = "read Mirage">
+    <input type="button" onclick = "getProgramDump()" value = "read Mirage">
 </main>
     <footer class="blog-footer">
         <div class="container text-center">
