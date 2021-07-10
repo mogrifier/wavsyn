@@ -21,6 +21,10 @@ var dirty = false
 //program data for current sound
 
 
+//default values
+var loadBank = 1
+var saveBank = 1
+
 
 //metadata about the range of values in the UI vewrsus internal memory of mirage/ do i need this?
 
@@ -139,10 +143,45 @@ function configureMidi() {
     window.api.send('getMidiPorts')
     isMidiConfigured = true
     //enable UI to use save button and selectors
-    document.getElementById("saveSound").removeAttribute('disabled')
-    document.getElementById("sound").removeAttribute('disabled')
+    //document.getElementById("sound").removeAttribute('disabled')
     document.getElementById("program").removeAttribute('disabled')
+    document.getElementById("savebank").removeAttribute('disabled')
+    document.getElementById("savesound").removeAttribute('disabled')
+    document.getElementById("loadbank").removeAttribute('disabled')
+    document.getElementById("loadsound").removeAttribute('disabled')
 }
+
+
+
+/**
+ * Send sysex command to load a new sound from floppy into the mirage
+ */
+function loadSound() {
+
+
+    //update UI so current sound/program match loaded
+    setSound(loadBank)
+    uiSound = loadBank
+    document.getElementById("sound").value = uiSound
+    setDirtyFlag(false)
+}
+
+
+/**
+ * Set by changes to the UI dropdown list for selecting bank to load from
+ */
+function setLoadBank() {
+    loadBank = parseInt(document.getElementById("loadbank").value)
+}
+
+/**
+ * Set by changes to the UI dropdown list for selecting bank to save to
+ */
+function setSaveBank() {
+    saveBank = parseInt(document.getElementById("savebank").value)
+}
+
+
 
 /**
  * Update midi in and out variables when user selects new value
@@ -174,6 +213,9 @@ function saveSound() {
     let bank = isLower ? "lower" : "upper"
     console.log(`Saving current Mirage sound/programs to  ${bank} bank sound ${sound}`)
     window.api.send('saveSound', data)
+
+    //after a save there are editor editor changes so rest flag
+    setDirtyFlag(false)
 }
 
 
