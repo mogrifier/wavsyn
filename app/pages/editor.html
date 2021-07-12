@@ -213,13 +213,19 @@
             </tr>
             <tr>    
                 <td>
-                    <label for="monomode_on">Mono</label>&nbsp;&nbsp;<input type="radio" id="monomode_on" name="monomode" value="on"><label for="monomode_on">&nbsp;on</label>
-                    <input type="radio" id="monomode_off" name="monomode" value="off" checked><label for="monomode_off">&nbsp;off</label>
+                    <label for="monomode_on">Mono</label>&nbsp;&nbsp;
+                    <input type="radio" id="monomode_on" name="monomode" value="on" onclick="updateMode('monomode', 'on')">
+                    <label for="monomode_on">&nbsp;on</label>
+                    <input type="radio" id="monomode_off" name="monomode" value="off" checked onclick="updateMode('monomode', 'off')">
+                    <label for="monomode_off">&nbsp;off</label>
                 </td>
                 
                 <td>
-                    <label for="mixmode_on">Mix</label>&nbsp;&nbsp;<input type="radio" id="mixmode_on" name="mixmode" value="on"><label for="mixmode_on">&nbsp;on</label>
-                    <input type="radio" id="mixmode_off" name="mixmode" value="off" checked><label for="mixmode_off">&nbsp;off</label>
+                    <label for="mixmode_on">Mix</label>&nbsp;&nbsp;
+                    <input type="radio" id="mixmode_on" name="mixmode" value="on" onclick="updateMode('mixmode', 'on')">
+                    <label for="mixmode_on">&nbsp;on</label>
+                    <input type="radio" id="mixmode_off" name="mixmode" value="off" checked onclick="updateMode('mixmode', 'off')">
+                    <label for="mixmode_off">&nbsp;off</label>
                 </td>
                 <td></td>
                 <td><label for="cutoff">VS Release</label></td>

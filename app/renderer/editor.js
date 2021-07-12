@@ -18,15 +18,25 @@ var program = 1
 var isLower = true
 //track editor changes
 var dirty = false
-//program data for current sound
-
-
 //default values
 var loadBank = 1
 var saveBank = 1
 
 
-//metadata about the range of values in the UI vewrsus internal memory of mirage/ do i need this?
+//program data for current sound. 4 pgroams. Note the program variable starts at 1. this holds
+//an object with key (param name from UI) value pairs. Value is from Mirage. The UI code has to
+//divide the parameter as needed for display in the UI. (separate responsibilities)
+//This part of code stores the value Mirage has.
+var allPrograms = new Array(4)
+//parameters names using unique css selector ID's from the UI.
+parameterNames = ['mixmode', 'lfo_freq', 'lfo_depth', 'osc_detune', 'osc_mix', 'mix_velo', 'cutoff', 'resonance',
+    'tracking', 'spare', 'wavesample', 'mixmode', 
+    'fea', 'fep', 'fed', 'fes', 'fer', 
+    'feva', 'fevp', 'fevd', 'fevs', 'fevr', 
+    'aea', 'aep', 'aed', 'aes', 'aer', 
+    'aeva', 'aevp', 'aevd', 'aevs', 'aevr']
+
+//metadata about the range of values in the UI versus internal memory of mirage/ do i need this?
 
 
 
@@ -67,6 +77,49 @@ function update(label) {
     data["delta"] =  3 //will need a decimal value from the hex string
     window.api.send('writeParameter', data)
 }
+
+/**
+ * The radio buttons for mixmode and monomode need special handler
+ * @param {radiobutton group name} name 
+ * @param {on or off} value 
+ */
+function updateMode(name, value) {
+
+        //check if midi is configured or not
+        if (!isMidiConfigured) {
+            //reset UI to default- making sure both off buttons are checked is correct deault state
+            document.getElementById("mixmode_off").checked = "true"
+            document.getElementById("monomode_off").checked = "true"
+            //pop warning
+            window.api.send('showWarning', "Please press 'Configure MIDI' and choose IN and OUT ports first.")
+            return
+        }
+
+    //update dirty flag- could make a 100% compare old vs new, but this is simple.
+    setDirtyFlag(true)
+        
+    if (name == "monomode") {
+        data["parameter"] = 0
+    }
+    else {
+        //mixmode
+        data["parameter"] = 11
+    }
+
+    if (value == "off") {
+        data["value"] = 0
+    }
+    else{
+        data["value"] = 1
+    }
+    //send new value to Mirage. off = 0, on = 1
+    var data = new Object()
+    data["midiIn"] = midiIn
+    data["midiOut"] = midiOut
+    window.api.send('writeParameter', data)
+}
+
+
 
 function setUISound() {
 
@@ -154,10 +207,18 @@ function configureMidi() {
 
 
 /**
- * Send sysex command to load a new sound from floppy into the mirage
+ * Send sysex command to load a new sound from floppy into the mirage and load it into the UI.
+ * Defaults to loading Program 1 for whatever sound it is.
  */
 function loadSound() {
-
+    var data = new Object()
+    data["midiIn"] = midiIn
+    data["midiOut"] = midiOut
+    data["isLower"] = isLower
+    data["sound"] = loadBank
+    let bank = isLower ? "lower" : "upper"
+    console.log(`Saving current Mirage sound/programs to  ${bank} bank sound ${sound}`)
+    window.api.send('getProgramDump', data)
 
     //update UI so current sound/program match loaded
     setSound(loadBank)
@@ -219,9 +280,39 @@ function saveSound() {
 }
 
 
-function getProgramData() {
-    //
-}
+
+/**
+ * Call back for recieving a program dump. Must parse it and SAVE it to all 4 programData objects
+ * and put them into allPrograms. (global soo callback can access them)
+ */
+window.api.receive('programDump', (event, args) => {
+    /** receive 1255 bytes representing 625 bytes per the spec. Only interested in the program data for now.
+    each byte is a nibble in LS MS order for each pair EXCEPT first byte is just a single byte.
+      (9 * 32 + 8 * 24 + 1) * 2  offset into the 1255 bytes (after 4 bytes of sysex). Programs start from there. each program
+    takes up 72 bytes. Math Check. 4 * 72 = 288.   288 + 192 + 1 = 481. 481 * 2 = 962. 962 + 288 = 1250.
+    Sysex header is 4 bytes. Sysex ends with F7. So 5 bytes. 1255 -5 = 1250 nybbles. which form 625 bytes.
+    */
+    var dump = Buffer.alloc(288)
+    //just copy 288bytes- skip headers and all but program data
+    args.copy(dump, 0, 966, 1254)
+    //now break into program objects- 72 bytes each, 36 pairs = 36 bytes of program data as per spec
+    for (var i = 0; i < 4; i++) {
+        //process all four programs of data
+        var count = 0
+        var dump = new Object()
+        for (var j = 0; j < 72; j+=2) {
+            //process each pair into a byte
+            let ls = dump[i * 4 + j]
+            let ms = dump[i * 4 + j + 1]
+            let value = ms << 4 + ls
+            //get name of parameter. There are 32 since there are 4 spare bytes at end. 9 is also a spare byte.
+            let key = parameterNames[count++]
+            dump[key] = value
+        }
+        //store dump.
+        allPrograms[i] = dump
+    }
+})
 
 
 /** receives callback from the main process. arg is midiPorts with two values
