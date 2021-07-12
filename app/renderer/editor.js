@@ -14,13 +14,11 @@ var isMidiConfigured = false
 var sound = 1
 //range 1 -4
 var program = 1
-//boolean
-var isLower = true
 //track editor changes
 var dirty = false
 //default values
-var loadBank = 1
-var saveBank = 1
+var loadSoundBank = 1
+var saveSoundBank = 1
 
 
 //program data for current sound. 4 pgroams. Note the program variable starts at 1. this holds
@@ -34,7 +32,8 @@ var parameterNames = ['mixmode', 'lfo_freq', 'lfo_depth', 'osc_detune', 'osc_mix
     'fea', 'fep', 'fed', 'fes', 'fer', 
     'feva', 'fevp', 'fevd', 'fevs', 'fevr', 
     'aea', 'aep', 'aed', 'aes', 'aer', 
-    'aeva', 'aevp', 'aevd', 'aevs', 'aevr']
+    'aeva', 'aevp', 'aevd', 'aevs', 'aevr',
+    'spare', 'spare', 'spare', 'spare']
 
 //metadata about the range of values in the UI versus internal memory of mirage/ do i need this?
 
@@ -56,12 +55,7 @@ function update(label) {
 
     let newValue = parseInt(document.getElementById(label).value, 10)
     //display as 2 digit hex
-    console.log(newValue)
-    let hexStr = newValue.toString(16)
-    if (hexStr.length < 2) {
-        hexStr = "0" + hexStr
-    }
-    document.getElementById(label + "_display").value = hexStr
+    document.getElementById(label + "_display").value = getHexString(newValue)
 
     //update dirty flag- could make a 100% compare old vs new, but this is simple.
     setDirtyFlag(true)
@@ -77,6 +71,18 @@ function update(label) {
     data["delta"] =  3 //will need a decimal value from the hex string
     window.api.send('writeParameter', data)
 }
+
+
+
+function getHexString(value){
+    let hexStr = value.toString(16)
+    if (hexStr.length < 2) {
+        hexStr = "0" + hexStr
+    }
+    return hexStr
+}
+
+
 
 /**
  * The radio buttons for mixmode and monomode need special handler
@@ -121,61 +127,78 @@ function updateMode(name, value) {
 
 
 
-function setUISound() {
-
-    //pop a warning if changing a dirty sound without saving firat
-    if (dirty) {
-        //warn
-
-    }
-
-
-    let uiSound = parseInt(document.getElementById("sound").value)
-    setSound(uiSound)
-    //send sysex to have mirage load new sound
-
-    //reset dirty flag warning
-    setDirtyFlag(false)
-}
-
-
 function setProgram() {
     program = parseInt(document.getElementById("program").value)
-    //send sysex to load new program
+    //get program info from allPrograms (since already loaded from Mirage and in sync)s)
+    //program is zero-based in code. 1-4 in UI. 0-3 internally.
+    var currentProgram = allPrograms[program - 1]
+    Object.keys(currentProgram ).forEach(key =>
+    {
+        //mixmode and monomode are special, since radio buttons. There is an xx_on and xx_off id for each.
+        let value = currentProgram[key]
 
-    //set to dirty
+        if (program == 4) {
+            console.log('key ${key}  and value ${value}')
+        }
+
+
+        if (key == "spare") {
+            //same as continue in a forEach loop
+            return
+        } 
+        else if (key == "mixmode"){
+            //set correct state of each button
+            if (value == 0)
+            {
+                document.getElementById("mixmode_off").checked = "true"
+            }
+            else {
+                document.getElementById("mixmode_on").checked = "true"
+            }
+        } 
+        else if (key == "monomode") {
+            if (value == 0)
+            {
+                document.getElementById("monomode_off").checked = "true"
+            }
+            else {
+                document.getElementById("monomode_on").checked = "true"
+            }
+
+        }
+        else {
+            //go through the rest of the keys. those are the UI id's. set values. don't forget to rescale some.
+            //check if value needs to be rescaled from how Mirage stores to how UI displays.
+            document.getElementById(key).value = value
+            //reload the textfield, too.
+            //display as 2 digit hex
+            document.getElementById(key + "_display").value = getHexString(value)
+        }
+
+        
+    })
+
+    //reset dirty flag since a new pgoram got loaded
     setDirtyFlag(false)
 }
+
 
 
 function setDirtyFlag(isDirty) {
     var flag = document.getElementById("dirty")
     //reset dirty flag warning
-    if (isDirty){
+    if (isDirty) {
         flag.style.color = "red";
         flag.value = "Editor has changes!!"
         dirty = true
     }
-    else{
+    else {
         flag.style.color = "green";
         flag.value = "No changes yet"
         dirty = false
     }
 }
 
-
-function setSound(uiSound) {
-    //use uiSound to set the sound number and flag for upper or lower
-    //ensures sound is always 1-3
-    if (uiSound < 4) {
-        isLower = true
-        sound = uiSound
-    }
-    else {
-        isLower = false
-        sound = uiSound % 3
-    }
-}
 
 
 function getProgramDump() {
@@ -185,8 +208,12 @@ function getProgramDump() {
     var data = new Object()
     data["midiIn"] = midiIn
     data["midiOut"] = midiOut
-    data["isLower"] = isLower
-    data["sound"] = sound
+    if (loadSoundBank < 4) {
+        data["isLower"] = true
+    }
+    else {
+        data["isLower"] = false
+    }
     window.api.send('getProgramDump', data)
 }
 
@@ -196,14 +223,13 @@ function configureMidi() {
     window.api.send('getMidiPorts')
     isMidiConfigured = true
     //enable UI to use save button and selectors
-    //document.getElementById("sound").removeAttribute('disabled')
     document.getElementById("program").removeAttribute('disabled')
-    document.getElementById("savebank").removeAttribute('disabled')
+    document.getElementById("savesoundbank").removeAttribute('disabled')
     document.getElementById("savesound").removeAttribute('disabled')
-    document.getElementById("loadbank").removeAttribute('disabled')
+    document.getElementById("loadsoundbank").removeAttribute('disabled')
     document.getElementById("loadsound").removeAttribute('disabled')
+    document.getElementById("getdump").removeAttribute('disabled')
 }
-
 
 
 /**
@@ -211,35 +237,45 @@ function configureMidi() {
  * Defaults to loading Program 1 for whatever sound it is.
  */
 function loadSound() {
+
+    //want a dirty warning but it needs to give user the choice of overriding unsaved sounds.
+
     var data = new Object()
     data["midiIn"] = midiIn
     data["midiOut"] = midiOut
-    data["isLower"] = isLower
-    data["sound"] = loadBank
-    let bank = isLower ? "lower" : "upper"
-    console.log(`Loading current Mirage sound/programs to  ${bank} bank sound ${sound}`)
-    window.api.send('getProgramDump', data)
 
+    if (loadSoundBank < 4) {
+        data["sound"] = loadSoundBank
+        data["isLower"] = true
+    }
+    else {
+        //adjust range to 1-3 for sysex
+        data["sound"] = loadSoundBank - 3
+        data["isLower"] = false
+    }
+
+    let bank = data["isLower"] ? "lower" : "upper"
+    console.log(`Loading current Mirage sound/programs from ${bank} bank sound ${sound}`)
+    
     //update UI so current sound/program match loaded
-    setSound(loadBank)
-    uiSound = loadBank
-    document.getElementById("sound").value = uiSound
+    document.getElementById("sound").value = loadSoundBank
     setDirtyFlag(false)
+    window.api.send('loadSound', data)
 }
 
 
 /**
  * Set by changes to the UI dropdown list for selecting bank to load from
  */
-function setLoadBank() {
-    loadBank = parseInt(document.getElementById("loadbank").value)
+function setLoadSoundBank() {
+    loadSoundBank = parseInt(document.getElementById("loadsoundbank").value)
 }
 
 /**
  * Set by changes to the UI dropdown list for selecting bank to save to
  */
-function setSaveBank() {
-    saveBank = parseInt(document.getElementById("savebank").value)
+function setSaveSoundBank() {
+    saveSoundBank = parseInt(document.getElementById("savesoundbank").value)
 }
 
 
@@ -269,9 +305,18 @@ function saveSound() {
     var data = new Object()
     data["midiIn"] = midiIn
     data["midiOut"] = midiOut
-    data["isLower"] = isLower
-    data["sound"] = sound
-    let bank = isLower ? "lower" : "upper"
+
+    if (saveSoundBank < 4) {
+        data["sound"] = saveSoundBank
+        data["isLower"] = true
+    }
+    else {
+        //adjust range to 1-3 for sysex
+        data["sound"] = saveSoundBank - 3
+        data["isLower"] = false
+    }
+
+    let bank = data["isLower"] ? "lower" : "upper"
     console.log(`Saving current Mirage sound/programs to  ${bank} bank sound ${sound}`)
     window.api.send('saveSound', data)
 
@@ -292,6 +337,8 @@ window.api.receive('programDump', (event, args) => {
     takes up 72 bytes. Math Check. 4 * 72 = 288.   288 + 192 + 1 = 481. 481 * 2 = 962. 962 + 288 = 1250.
     Sysex header is 4 bytes. Sysex ends with F7. So 5 bytes. 1255 -5 = 1250 nybbles. which form 625 bytes.
     */
+   console.log(`in received programDump. Triggered by event ${event}`)
+
    //dumpData is all 4 programs
     var dumpData = new Array(288)
     //just copy 288bytes- skip headers and all but program data

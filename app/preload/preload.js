@@ -39,6 +39,9 @@ contextBridge.exposeInMainWorld(
                 ipcRenderer.send(channel, data);
                 console.log(`in method send; sending ${data} to channel ${channel}`);
             }
+            else {
+              console.log(`unknown channel: ${channel}`);
+            }
         },
         receive: (channel, data) => {
             let validChannels = ["fromMain", "selectDirectory", "midiPorts", "parameterValue", "programDump"];

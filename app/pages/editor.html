@@ -28,7 +28,7 @@
     <tr>
         <td  width="20%" class="bg-warning"><input type="textfield" id="dirty" size="20" style="color:green" value="No changes yet" readonly></td>
         <td  width="20%"><b>Current Sound</b></td>
-        <td  width="20%"><select name="sound" id="sound" class="custom-select" onchange="setUISound()" disabled>
+        <td  width="20%"><select name="sound" id="sound" class="custom-select" disabled>
             <option value="1">Lower 1</option>
             <option value="2">Lower 2</option>
             <option value="3">Lower 3</option>
@@ -42,13 +42,18 @@
             <option value="1">Program 1</option>
             <option value="2">Program 2</option>
             <option value="3">Program 3</option>
-            <option value="34">Program 4</option>
+            <option value="4">Program 4</option>
             </select>
         </td>
       </tr>
       <tr>
-        <td  width="40%" colspan="2">Load Sound from selected bank</td>
-        <td  width="20%"><select name="loadbank" id="loadbank" class="custom-select" onchange="setLoadBank()" disabled>
+        <td  width="60%" colspan="3">Load Editor from current sound/programs in Mirage</td>
+        <td  width="20%"><input type = "button" id="getdump" onclick = "getProgramDump()" class="btn btn-info" value="Load Editor" disabled></td>
+        <td  width="20%"></td>
+      </tr>
+      <tr>
+        <td  width="40%" colspan="2">Load Sound/Programs from selected bank</td>
+        <td  width="20%"><select name="loadbank" id="loadsoundbank" class="custom-select" onchange="setLoadSoundBank()" disabled>
             <option value="1">Lower 1</option>
             <option value="2">Lower 2</option>
             <option value="3">Lower 3</option>
@@ -61,8 +66,8 @@
           <td  width="20%"></td>
       </tr>
       <tr>
-        <td  width="40%" colspan="2">Save Sound to selected bank</td>
-        <td  width="20%"><select name="savebank" id="savebank" class="custom-select" onchange="setSaveBank()" disabled>
+        <td  width="40%" colspan="2">Save Sound/Programs to selected bank</td>
+        <td  width="20%"><select name="savebank" id="savesoundbank" class="custom-select" onchange="setSaveSoundBank()" disabled>
             <option value="1">Lower 1</option>
             <option value="2">Lower 2</option>
             <option value="3">Lower 3</option>

@@ -28,6 +28,9 @@ function getMidiPorts() {
       console.log(`found midi output ${current}`)
     }
 
+    input.closePort()
+    output.closePort()
+
     //return object
     midiPorts["inputs"] = inputList
     midiPorts["outputs"] = outputList

@@ -118,10 +118,17 @@ ipcMain.on("getProgramDump", (event, args) => {
 
     // Configure a callback.
     midiInput.on('message', (deltaTime, message) => {
-    // The message is an array of numbers corresponding to the bytes in the dump (i hope!)
-    mainWindow.webContents.send("programDump", Buffer.from(message));
-    console.log(`m: ${message} d: ${deltaTime}`);
-    midiInput.closePort()
+     if (message.length == 1255) {
+       // The message is an array of numbers corresponding to the bytes in the dump (i hope!)
+      mainWindow.webContents.send("programDump", Buffer.from(message));
+      console.log(`program dump: ${message} d: ${deltaTime}`);
+     }
+     else {
+       //error
+       console.log(`data does not contain a program dump fo 1255 bytes; has ${message.length} bytes`);
+     }
+
+      midiInput.closePort()
   });
 
   midiInput.openPort(parseInt(args["midiIn"]));
@@ -178,12 +185,12 @@ ipcMain.on("saveSound", (event, args) => {
       let isLower = args["isLower"]
       let sound = args["sound"]
       var sysex = []
-      //10 is lower, 11 is upper. The 10 is for enter.
+      //17 is lower, 16 is upper. The 10 is for enter.
       if (isLower) {
-        sysex = [sound, 10]
+        sysex = [17, sound, 10]
       }
       else {
-        sysex = [sound, 10]
+        sysex = [16, sound, 10]
       }
       sendSysex(args["midiIn"], args["midiOut"], sysex)
   })
@@ -243,7 +250,6 @@ ipcMain.on("readParameter", (event, args) => {
         // https://www.cs.cf.ac.uk/Dave/Multimedia/node158.html has some helpful
         // information interpreting the messages.
         console.log(`m: ${message} d: ${deltaTime}`);
-        midiInput.closePort()
       });
 
       //make command to select parameter to change f0 0f 01 01 0c 03 07  7f f7
@@ -269,7 +275,8 @@ ipcMain.on("readParameter", (event, args) => {
 
       //close output and input
       midiOutput.closePort()
-      
+      //closing here since multiple messages were sent and there may be several callbacks
+      midiInput.closePort()
     })
 
     
