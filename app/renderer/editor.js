@@ -183,7 +183,6 @@ function setProgram() {
 }
 
 
-
 function setDirtyFlag(isDirty) {
     var flag = document.getElementById("dirty")
     //reset dirty flag warning
@@ -200,24 +199,6 @@ function setDirtyFlag(isDirty) {
 }
 
 
-
-function getProgramDump() {
-    //send sysex command to the Mirage to get a program dump (upper or lower)
-    //if lower = true, get a lower program dump of 3 programs
-    //create one argument object to send
-    var data = new Object()
-    data["midiIn"] = midiIn
-    data["midiOut"] = midiOut
-    if (loadSoundBank < 4) {
-        data["isLower"] = true
-    }
-    else {
-        data["isLower"] = false
-    }
-    window.api.send('getProgramDump', data)
-}
-
-
 function configureMidi() {
     //load the midi ports into the UI
     window.api.send('getMidiPorts')
@@ -228,7 +209,6 @@ function configureMidi() {
     document.getElementById("savesound").removeAttribute('disabled')
     document.getElementById("loadsoundbank").removeAttribute('disabled')
     document.getElementById("loadsound").removeAttribute('disabled')
-    document.getElementById("getdump").removeAttribute('disabled')
 }
 
 
@@ -328,7 +308,8 @@ function saveSound() {
 
 /**
  * Call back for recieving a program dump. Must parse it and SAVE it to all 4 programData objects
- * and put them into allPrograms. (global soo callback can access them)
+ * and put them into allPrograms. (global soo callback can access them). Note this is coming after a
+ * load bank operation  not a straight program dump request, so length is 1267 vice 1255.
  */
 window.api.receive('programDump', (event, args) => {
     /** receive 1255 bytes representing 625 bytes per the spec. Only interested in the program data for now.
@@ -362,6 +343,10 @@ window.api.receive('programDump', (event, args) => {
         //store dump.
         allPrograms[i] = dump
     }
+
+    //now set the UI to program 1 for editing purposes.
+    document.getElementById("program").value = 1
+    setProgram()
 })
 
 

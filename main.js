@@ -175,25 +175,51 @@ ipcMain.on("saveSound", (event, args) => {
 
 
 /**
- * Execute mirage command to load from floppy soudn 1, 2, 3
+ * Execute mirage command to load from floppy soudn 1, 2, 3. This also automatically sends
+ * back a program dump and an extra 12 bytes of systex (why I don't know).
  */
  ipcMain.on("loadSound", (event, args) => {
-  /**data["midiIn"] = midiIn
-      data["midiOut"] = midiOut
-      data["isLower"] = isLower
-      data["sound"] = sound  */
-      let isLower = args["isLower"]
-      let sound = args["sound"]
-      var sysex = []
-      //17 is lower, 16 is upper. The 10 is for enter.
-      if (isLower) {
-        sysex = [17, sound, 10]
+    let midiIn = args["midiIn"]
+    let midiOut = args["midiOut"]
+    let isLower = args["isLower"]
+    let sound = args["sound"]
+    midiOutput = new midi.Output();
+    midiInput = new midi.Input();
+    midiInput.openPort(parseInt(midiIn));
+    //turn on listening for sysex messages (ignores timing and active sensing)
+    midiInput.ignoreTypes(false, true, true);
+    midiOutput.openPort(parseInt(midiOut));
+    // Configure a callback.
+    midiInput.on('message', (deltaTime, message) => {
+      if (message.length == 1255) {
+        console.log(`program dump: ${message} d: ${deltaTime}`);
+        // The message is an array of numbers corresponding to the bytes in the dump (i hope!)
+        mainWindow.webContents.send("programDump", Buffer.from(message));
       }
       else {
-        sysex = [16, sound, 10]
+        //error
+        console.log(`data does not contain a program dump of 1255 bytes; has ${message.length} bytes`);
       }
-      sendSysex(args["midiIn"], args["midiOut"], sysex)
-  })
+      //midiInput.closePort()
+    });
+
+    var sysex = []
+    //17 is lower, 16 is upper. The 10 is for enter.
+    if (isLower) {
+      sysex = [17, sound, 10]
+    }
+    else {
+      sysex = [16, sound, 10]
+    }
+
+    var prefix = [240, 15, 1, 1]
+    var suffix = [127, 247]
+    var fullSysex = [...prefix, ...sysex, ...suffix]
+    console.log(`sending sysex command ${fullSysex}`)
+    midiOutput.sendMessage(fullSysex)
+    midiOutput.closePort()
+})
+
 
 ipcMain.on("readParameter", (event, args) => {
   /** data["midiIn"] = midiIn
@@ -323,13 +349,8 @@ ipcMain.on("selectDirectory", (event, args) => {
 
 //would like it midi.js but concerned callbacks won't work 
 function sendSysex(midiIn, midiOut, sysex) {
-
-  /** read a parameter: f0 0f 01 01 0c 03 07 0d 7f f7   - crazy. 0c means parameter number follows. Comes as two bytes. 03 07 = 37
-  0d means return the value of the parameter. */
     midiOutput = new midi.Output();
     midiInput = new midi.Input();
-  
-    //HACK 2 is code for Mirage on system Open the first available input port.
     midiInput.openPort(parseInt(midiIn));
     //turn on listening for sysex messages (ignores timing and active sensing)
     midiInput.ignoreTypes(false, true, true);
