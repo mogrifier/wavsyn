@@ -243,6 +243,7 @@ ipcMain.on("readParameter", (event, args) => {
         // https://www.cs.cf.ac.uk/Dave/Multimedia/node158.html has some helpful
         // information interpreting the messages.
         console.log(`m: ${message} d: ${deltaTime}`);
+        midiInput.closePort()
       });
 
       //make command to select parameter to change f0 0f 01 01 0c 03 07  7f f7
@@ -268,7 +269,7 @@ ipcMain.on("readParameter", (event, args) => {
 
       //close output and input
       midiOutput.closePort()
-      midiInput.closePort()
+      
     })
 
     

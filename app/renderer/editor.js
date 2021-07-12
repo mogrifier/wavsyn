@@ -29,7 +29,7 @@ var saveBank = 1
 //This part of code stores the value Mirage has.
 var allPrograms = new Array(4)
 //parameters names using unique css selector ID's from the UI.
-parameterNames = ['mixmode', 'lfo_freq', 'lfo_depth', 'osc_detune', 'osc_mix', 'mix_velo', 'cutoff', 'resonance',
+var parameterNames = ['mixmode', 'lfo_freq', 'lfo_depth', 'osc_detune', 'osc_mix', 'mix_velo', 'cutoff', 'resonance',
     'tracking', 'spare', 'wavesample', 'mixmode', 
     'fea', 'fep', 'fed', 'fes', 'fer', 
     'feva', 'fevp', 'fevd', 'fevs', 'fevr', 
@@ -217,7 +217,7 @@ function loadSound() {
     data["isLower"] = isLower
     data["sound"] = loadBank
     let bank = isLower ? "lower" : "upper"
-    console.log(`Saving current Mirage sound/programs to  ${bank} bank sound ${sound}`)
+    console.log(`Loading current Mirage sound/programs to  ${bank} bank sound ${sound}`)
     window.api.send('getProgramDump', data)
 
     //update UI so current sound/program match loaded
@@ -292,19 +292,22 @@ window.api.receive('programDump', (event, args) => {
     takes up 72 bytes. Math Check. 4 * 72 = 288.   288 + 192 + 1 = 481. 481 * 2 = 962. 962 + 288 = 1250.
     Sysex header is 4 bytes. Sysex ends with F7. So 5 bytes. 1255 -5 = 1250 nybbles. which form 625 bytes.
     */
-    var dump = Buffer.alloc(288)
+   //dumpData is all 4 programs
+    var dumpData = new Array(288)
     //just copy 288bytes- skip headers and all but program data
-    args.copy(dump, 0, 966, 1254)
+    dumpData = args.slice(966, 1254)
     //now break into program objects- 72 bytes each, 36 pairs = 36 bytes of program data as per spec
     for (var i = 0; i < 4; i++) {
         //process all four programs of data
         var count = 0
+        //dump is a single program
         var dump = new Object()
         for (var j = 0; j < 72; j+=2) {
             //process each pair into a byte
-            let ls = dump[i * 4 + j]
-            let ms = dump[i * 4 + j + 1]
-            let value = ms << 4 + ls
+            let ls = dumpData[i * 72 + j]
+            let ms = dumpData[i * 72 + j + 1]
+            //addition happens before bitwise operations so paraentheses are required
+            let value = (ms << 4) + ls
             //get name of parameter. There are 32 since there are 4 spare bytes at end. 9 is also a spare byte.
             let key = parameterNames[count++]
             dump[key] = value
