@@ -27,7 +27,7 @@ var saveSoundBank = 1
 //This part of code stores the value Mirage has.
 var allPrograms = new Array(4)
 //parameters names using unique css selector ID's from the UI.
-var parameterNames = ['mixmode', 'lfo_freq', 'lfo_depth', 'osc_detune', 'osc_mix', 'mix_velo', 'cutoff', 'resonance',
+var parameterNames = ['monomode', 'lfo_freq', 'lfo_depth', 'osc_detune', 'osc_mix', 'mix_velo', 'cutoff', 'resonance',
     'tracking', 'spare', 'wavesample', 'mixmode', 
     'fea', 'fep', 'fed', 'fes', 'fer', 
     'feva', 'fevp', 'fevd', 'fevs', 'fevr', 
@@ -35,8 +35,24 @@ var parameterNames = ['mixmode', 'lfo_freq', 'lfo_depth', 'osc_detune', 'osc_mix
     'aeva', 'aevp', 'aevd', 'aevs', 'aevr',
     'spare', 'spare', 'spare', 'spare']
 
-//metadata about the range of values in the UI versus internal memory of mirage/ do i need this?
-
+//note that mix mode and mono mode in manual both say 28. One is wrong.
+var parameterID = {'monomode':29, 'lfo_freq':31 , 'lfo_depth':32, 'osc_detune':33, 'osc_mix':34, 'mix_velo':35, 
+    'cutoff':36, 'resonance':37,'tracking':38, 'wavesample':27, 'mixmode':28, 'fea':40, 'fep':41, 'fed':42,
+    'fes':43, 'fer':44, 'feva':45, 'fevp':46, 'fevd':47, 'fevs':48, 'fevr':49, 
+    'aea':50, 'aep':51, 'aed':52, 'aes':53, 'aer':54, 
+    'aeva':55, 'aevp':56, 'aevd':57, 'aevs':58, 'aevr':59}
+/** metadata on scaling values so UI on mirage and editor match, and the program value and mirage internal value match.
+ * Here's how to use. Mirage UI value times scale = internal value in program data object and in mirage.
+ * Program data value divided by scale = Mirge UI value. 
+ * Scale value of 1 has no effect either way, but simplest to just make call and calculate for all parameters vice
+ * using a big if/then statement.
+ * Mode values are on/off. 
+ */
+var parameterScale = {'monomode':1, 'lfo_freq':1 , 'lfo_depth':1, 'osc_detune':1, 'osc_mix':4, 'mix_velo':4, 
+    'cutoff':2, 'resonance':4,'tracking':1, 'wavesample':1, 'mixmode':1, 'fea':1, 'fep':1, 'fed':1,
+    'fes':1, 'fer':1, 'feva':4, 'fevp':4, 'fevd':4, 'fevs':4, 'fevr':4, 
+    'aea':1, 'aep':1, 'aed':1, 'aes':1, 'aer':1, 
+    'aeva':4, 'aevp':4, 'aevd':4, 'aevs':4, 'aevr':4}
 
 
 //generic method to update the value for a field/control given by the label.
@@ -52,23 +68,26 @@ function update(label) {
         return
     }
 
-
+    //this is the current, scaled value (same as mirage internal value)
+    let currentValue = allPrograms[program - 1][label]
+    //unscaled value from UI
     let newValue = parseInt(document.getElementById(label).value, 10)
-    //display as 2 digit hex
-    document.getElementById(label + "_display").value = getHexString(newValue)
-
+    //compute delta as number of arrow presses needed
+    let delta = newValue - (currentValue / parameterScale[label])
+    //display as 2 digit decimal, like mirage
+    document.getElementById(label + "_display").value = newValue
     //update dirty flag- could make a 100% compare old vs new, but this is simple.
     setDirtyFlag(true)
-
-    //compute thye delta (new - old value) by looking at what is in the program object
-
-    //send new value to Mirage. Not trivial- must lookup how to scale the value since the internal value
-    //does NOT match UI display (rather, it does NOW, but should not in future)
     var data = new Object()
     data["midiIn"] = midiIn
     data["midiOut"] = midiOut
-    data["parameter"] = "36" //parameter //lookup parameter id (two character string) for the lable
-    data["delta"] =  3 //will need a decimal value from the hex string
+    data["parameter"] = parameterID[label].toString() //lookup parameter id (as a string) for the lable
+    data["delta"] =  delta //ok to be positive or negative, since code will send up or down arrow as needed
+
+    //need to update the allPrograms[program - 1][label] value to match NEW value and it must be scaled to Mirage
+    //internal value
+    allPrograms[program - 1][label] = newValue * parameterScale[label]
+
     window.api.send('writeParameter', data)
 }
 
@@ -101,15 +120,16 @@ function updateMode(name, value) {
             return
         }
 
+    var data = new Object()
     //update dirty flag- could make a 100% compare old vs new, but this is simple.
     setDirtyFlag(true)
         
     if (name == "monomode") {
-        data["parameter"] = 0
+        data["parameter"] = parameterID["monomode"].toString() 
     }
     else {
         //mixmode
-        data["parameter"] = 11
+        data["parameter"] = parameterID["mixmode"].toString() 
     }
 
     if (value == "off") {
@@ -119,15 +139,19 @@ function updateMode(name, value) {
         data["value"] = 1
     }
     //send new value to Mirage. off = 0, on = 1
-    var data = new Object()
     data["midiIn"] = midiIn
     data["midiOut"] = midiOut
+
+    //set value in allPrograms. no need to scale it.
+    allPrograms[program - 1][data["parameter"]] = data["value"]
     window.api.send('writeParameter', data)
 }
 
 
-
-function setProgram() {
+/**
+ * Load the UI editor with data from the program selected or just loaded from mirage.
+ */
+function loadEditor() {
     program = parseInt(document.getElementById("program").value)
     //get program info from allPrograms (since already loaded from Mirage and in sync)s)
     //program is zero-based in code. 1-4 in UI. 0-3 internally.
@@ -136,11 +160,9 @@ function setProgram() {
     {
         //mixmode and monomode are special, since radio buttons. There is an xx_on and xx_off id for each.
         let value = currentProgram[key]
-
-        if (program == 4) {
-            console.log('key ${key}  and value ${value}')
-        }
-
+        //scale the value for display in the UI (no change to what is stored in the program array)
+        //value must be rounded to an integer. scale calculations can results in decimal values. Wonder how Mirage rounds?!?
+        value = Math.round(value / parameterScale[key])
 
         if (key == "spare") {
             //same as continue in a forEach loop
@@ -164,20 +186,20 @@ function setProgram() {
             else {
                 document.getElementById("monomode_on").checked = "true"
             }
-
+        }
+        else if (key == "wavesample") {
+            //wavesample is zero-based in mirage, but UI in mirage and hence editor is 1-based
+            document.getElementById(key).value = value + 1
+            document.getElementById(key + "_display").value = value + 1
         }
         else {
             //go through the rest of the keys. those are the UI id's. set values. don't forget to rescale some.
             //check if value needs to be rescaled from how Mirage stores to how UI displays.
             document.getElementById(key).value = value
             //reload the textfield, too.
-            //display as 2 digit hex
-            document.getElementById(key + "_display").value = getHexString(value)
+            document.getElementById(key + "_display").value = value
         }
-
-        
     })
-
     //reset dirty flag since a new pgoram got loaded
     setDirtyFlag(false)
 }
@@ -346,7 +368,7 @@ window.api.receive('programDump', (event, args) => {
 
     //now set the UI to program 1 for editing purposes.
     document.getElementById("program").value = 1
-    setProgram()
+    loadEditor()
 })
 
 

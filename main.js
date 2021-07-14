@@ -297,6 +297,8 @@ ipcMain.on("readParameter", (event, args) => {
       //now send it
       for (var i = 0; i < Math.abs(delta); i++) {
         midiOutput.sendMessage(fullSysex)
+        //await sleep (5)
+        let sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
       }
 
       //close output and input

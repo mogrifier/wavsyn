@@ -38,7 +38,7 @@
             </select>
         </td>
         <td  width="20%"><b>Current Program</b></td>
-        <td  width="20%"><select name="program" id="program" class="custom-select" onchange="setProgram()" disabled>
+        <td  width="20%"><select name="program" id="program" class="custom-select" onchange="loadEditor()" disabled>
             <option value="1">Program 1</option>
             <option value="2">Program 2</option>
             <option value="3">Program 3</option>
@@ -200,8 +200,8 @@
 
             <tr>
                 <td><label for="wavesample">Wavesample</label></td>
-                <td><input type="range" id="wavesample" value="0" min="0" max="7" onchange="update('wavesample')"></td>
-                <td><input type="textfield" id="wavesample_display" value="0" size="2" readonly></td>
+                <td><input type="range" id="wavesample" value="1" min="1" max="8" onchange="update('wavesample')"></td>
+                <td><input type="textfield" id="wavesample_display" value="1" size="2" readonly></td>
 
                 <td><label for="cutoff">VS Sustain</label></td>
                 <td><input type="range" id="fevs" value="0" min="0" max="31" onchange="update('fevs')"></td>
