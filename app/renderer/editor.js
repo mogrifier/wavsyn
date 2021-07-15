@@ -91,6 +91,9 @@ function update(label) {
     window.api.send('writeParameter', data)
 }
 
+function highlight(field){
+    field.style.outlinecolor = "red"
+}
 
 
 function getHexString(value){

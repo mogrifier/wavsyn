@@ -297,11 +297,10 @@ ipcMain.on("readParameter", (event, args) => {
       //now send it
       for (var i = 0; i < Math.abs(delta); i++) {
         midiOutput.sendMessage(fullSysex)
-        //await sleep (5)
-        let sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+        console.log("sent sysex")
       }
 
-      //close output and input
+      //close output and input9
       midiOutput.closePort()
       //closing here since multiple messages were sent and there may be several callbacks
       midiInput.closePort()
