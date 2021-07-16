@@ -11,11 +11,11 @@ var isMidiConfigured = false
 //program and sound used to set mirage up, once these are set, not used until they change. 
 //change should change mirage setting, so send sysex onChange()
 //range 1-6 modulo 3
-var sound = 1
+var currentSound = 1
 //range 1 -4
 var program = 1
 //track editor changes
-var dirty = false
+var isDirty = false
 //default values
 var loadSoundBank = 1
 var saveSoundBank = 1
@@ -57,8 +57,9 @@ var parameterScale = {'monomode':1, 'lfo_freq':1 , 'lfo_depth':1, 'osc_detune':1
 
 //generic method to update the value for a field/control given by the label.
 //called by UI. 
-function update(label) {
+function update(trigger) {
 
+    var label = trigger.id
     //check if midi is configured or not
     if (!isMidiConfigured) {
         //reset UI
@@ -91,10 +92,6 @@ function update(label) {
     window.api.send('writeParameter', data)
 }
 
-function highlight(field){
-    field.style.outlinecolor = "red"
-}
-
 
 function getHexString(value){
     let hexStr = value.toString(16)
@@ -106,12 +103,28 @@ function getHexString(value){
 
 
 
+function getBankAndSound(sound) {
+    var data = new Object()
+    if (sound < 4) {
+        data["sound"] = sound
+        data["isLower"] = true
+    }
+    else {
+        //adjust range to 1-3 for sysex
+        data["sound"] = sound - 3
+        data["isLower"] = false
+    }
+    return data
+}
+
+
+
 /**
  * The radio buttons for mixmode and monomode need special handler
- * @param {radiobutton group name} name 
- * @param {on or off} value 
+ * @param {radiobutton}  
+
  */
-function updateMode(name, value) {
+function updateMode(trigger) {
 
         //check if midi is configured or not
         if (!isMidiConfigured) {
@@ -127,7 +140,7 @@ function updateMode(name, value) {
     //update dirty flag- could make a 100% compare old vs new, but this is simple.
     setDirtyFlag(true)
         
-    if (name == "monomode") {
+    if (trigger.name == "monomode") {
         data["parameter"] = parameterID["monomode"].toString() 
     }
     else {
@@ -135,7 +148,7 @@ function updateMode(name, value) {
         data["parameter"] = parameterID["mixmode"].toString() 
     }
 
-    if (value == "off") {
+    if (trigger.value == "off") {
         data["value"] = 0
     }
     else{
@@ -151,10 +164,18 @@ function updateMode(name, value) {
 }
 
 
+
+function loadEditorFromDump() {
+    //since from a dump, the editor has no changes 
+    setDirtyFlag(false)
+    loadEditor()
+}
+
 /**
  * Load the UI editor with data from the program selected or just loaded from mirage.
  */
 function loadEditor() {
+    //just changing the program does not change if dirty or not (unless I switch to tracking at program level vice globally)
     program = parseInt(document.getElementById("program").value)
     //get program info from allPrograms (since already loaded from Mirage and in sync)s)
     //program is zero-based in code. 1-4 in UI. 0-3 internally.
@@ -203,23 +224,21 @@ function loadEditor() {
             document.getElementById(key + "_display").value = value
         }
     })
-    //reset dirty flag since a new pgoram got loaded
-    setDirtyFlag(false)
 }
 
 
-function setDirtyFlag(isDirty) {
+function setDirtyFlag(status) {
     var flag = document.getElementById("dirty")
     //reset dirty flag warning
-    if (isDirty) {
+    if (status) {
         flag.style.color = "red";
         flag.value = "Editor has changes!!"
-        dirty = true
+        isDirty = true
     }
     else {
         flag.style.color = "green";
         flag.value = "No changes yet"
-        dirty = false
+        isDirty = false
     }
 }
 
@@ -244,26 +263,35 @@ function configureMidi() {
 function loadSound() {
 
     //want a dirty warning but it needs to give user the choice of overriding unsaved sounds.
+    if (isDirty) {
+        //show warning
+        /**
+         * need to know bank and sound number from the currentsound status
+         */
+        let current = getBankAndSound(currentSound)
+        let bank = current["isLower"] ? "lower" : "upper"
+        var answer = window.confirm(`The editor has unsaved data. Save current sound to 
+            disk ${bank} to ${current["sound"]}?`);
+        if (answer) {
+            //this saves to CURRENT SOUND vice to the saveSoundBank since following a different path
+            //(assumption is you want to save to same bank you were editing; otherwise, you would use other method)
+            saveSound()
+        }
+        else {
+            return
+        }
+    }
 
     var data = new Object()
     data["midiIn"] = midiIn
     data["midiOut"] = midiOut
-
-    if (loadSoundBank < 4) {
-        data["sound"] = loadSoundBank
-        data["isLower"] = true
-    }
-    else {
-        //adjust range to 1-3 for sysex
-        data["sound"] = loadSoundBank - 3
-        data["isLower"] = false
-    }
-
+    data = {...data, ...getBankAndSound(loadSoundBank)}
+    //this will display good log like "from lower bank sound 2"
     let bank = data["isLower"] ? "lower" : "upper"
-    console.log(`Loading current Mirage sound/programs from ${bank} bank sound ${sound}`)
-    
+    console.log(`Loading current Mirage sound/programs from ${bank} bank sound ${data["sound"]}`)
     //update UI so current sound/program match loaded
-    document.getElementById("sound").value = loadSoundBank
+    document.getElementById("currentsound").value = loadSoundBank
+    currentSound = loadSoundBank
     setDirtyFlag(false)
     window.api.send('loadSound', data)
 }
@@ -303,28 +331,16 @@ function selectMidi(direction) {
 
 /**
  * This tells the Mirage to save the current sound/programs to disk. It DOES NOT send the program data
- * since that is already in the Mirage since the UI is in sync with the Mirage. It could allow you to 
- * copy data to different sounds or upper/lower halves.
+ * since that is already in the Mirage since the UI is in sync with the Mirage. 
  */
 function saveSound() {
     var data = new Object()
     data["midiIn"] = midiIn
     data["midiOut"] = midiOut
-
-    if (saveSoundBank < 4) {
-        data["sound"] = saveSoundBank
-        data["isLower"] = true
-    }
-    else {
-        //adjust range to 1-3 for sysex
-        data["sound"] = saveSoundBank - 3
-        data["isLower"] = false
-    }
-
+    data = {...data, ...getBankAndSound(saveSoundBank)}
     let bank = data["isLower"] ? "lower" : "upper"
-    console.log(`Saving current Mirage sound/programs to  ${bank} bank sound ${sound}`)
+    console.log(`Saving current Mirage sound/programs to  ${bank} bank sound ${data["sound"]}`)
     window.api.send('saveSound', data)
-
     //after a save there are editor editor changes so rest flag
     setDirtyFlag(false)
 }
@@ -371,7 +387,7 @@ window.api.receive('programDump', (event, args) => {
 
     //now set the UI to program 1 for editing purposes.
     document.getElementById("program").value = 1
-    loadEditor()
+    loadEditorFromDump()
 })
 
 
