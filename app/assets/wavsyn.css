@@ -1,0 +1,56 @@
+/* spinner for parameter entry */
+
+input[type="number"] {
+    position: relative;
+    margin: 2 2  2  2px;
+    border: 1px solid rgb(7, 5, 141);
+    border-color: rgb(7, 5, 141) rgb(7, 5, 141) rgb(7, 5, 141) rgb(7, 5, 141);
+    padding: 3px;
+    max-width: 60px;
+    font-family: 'DSEG7Classic-Bold';
+    background: rgb(0, 0, 0);
+    color:rgb(255, 251, 4);
+}
+
+/* Spin Buttons modified */
+input[type="number"].ledspinner::-webkit-outer-spin-button, 
+input[type="number"].ledspinner::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    background: #FFF url(https://media.geeksforgeeks.org/wp-content/uploads/20190314004249/sample-image2.png) no-repeat center center;
+    width: 24px;
+    border-left: 1px solid rgb(7, 5, 141);
+    opacity: 1; /* shows Spin Buttons per default (Chrome >= 39) */
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+
+/* overrides for fieldset and legend. Boostrap 5 takes away some things I want back. 
+<fieldset  style="padding:5px;border:3px solid blue;border-radius:8px;width: fit-content;" >
+<legend style="float: none;margin-left: 10px;margin-right: 10px;padding-right: 10px;padding-left: 10px;width: fit-content;">Change Cutoff</legend>
+<input id="input-number-mod" class="mod" style="background: rgb(0, 0, 0);color:rgb(255, 251, 4);font-family: 'DSEG7Classic-Bold'"
+*/
+legend {
+    float: none;
+    margin-left: 10px;
+    margin-right: 10px;
+    padding-right: 10px;
+    padding-left: 10px;
+    width: fit-content;
+}
+
+
+fieldset {
+    padding:5px;
+    border:3px solid blue;
+    border-radius:8px;
+    width: fit-content;
+}
+/* 7 segment display font */
+@font-face {
+    font-family: 'DSEG7Classic-Bold';
+    src: url(./fonts-DSEG_v046/DSEG7-Classic/DSEG7Classic-Bold.woff2) format('woff2');
+  }
+

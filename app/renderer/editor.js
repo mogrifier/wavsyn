@@ -2,7 +2,6 @@
 //maintains overall state for all programs (12 - 4 per sound)
 //would like to use same listeners but with some extra parameters to identify
 //which sound/program was being edited.
-
 //user sets these. all midi functions must use them. 
 var midiIn
 var midiOut
@@ -55,6 +54,7 @@ var parameterScale = {'monomode':1, 'lfo_freq':1 , 'lfo_depth':1, 'osc_detune':1
     'aeva':4, 'aevp':4, 'aevd':4, 'aevs':4, 'aevr':4}
 
 
+
 //generic method to update the value for a field/control given by the label.
 //called by UI. 
 function update(trigger) {
@@ -69,10 +69,20 @@ function update(trigger) {
         return
     }
 
-    //this is the current, scaled value (same as mirage internal value)
-    let currentValue = allPrograms[program - 1][label]
+/** I am blocking the holding of mouse down on the spinner to prevent it going too fast.
+ * I need to implement min and max control for each id type- min and max are values of the trigger, so simple to get.
+ * 
+ * BUT i need to know if event was an up or down. where is that??. Can examine the event. the onclick mouse event has a
+ * layerX and layerY value (and some others) that change depending on where you click. These appear to be realtive to the space you
+ * click in so if you know that size, draw a horizontal line through it. Y above line is up, below line is down.
+ * 
+ */
+
     //unscaled value from UI
-    let newValue = parseInt(document.getElementById(label).value, 10)
+    let newValue = parseInt(document.getElementById(label).value, 10) + 1
+    document.getElementById(label).value = newValue
+        //this is the current, scaled value (same as mirage internal value)
+        let currentValue = allPrograms[program - 1][label]
     //compute delta as number of arrow presses needed
     let delta = newValue - (currentValue / parameterScale[label])
     //display as 2 digit decimal, like mirage
@@ -90,6 +100,17 @@ function update(trigger) {
     allPrograms[program - 1][label] = newValue * parameterScale[label]
 
     window.api.send('writeParameter', data)
+}
+
+
+function captureMouse(trigger) {
+    console.log('caught the mouse')
+    if (trigger == "down") {
+        return false
+    }
+    else {
+        return true
+    }
 }
 
 
