@@ -3,22 +3,21 @@
 input[type="number"] {
     position: relative;
     margin: 2 2  2  2px;
-    border: 1px solid rgb(7, 5, 141);
-    border-color: rgb(7, 5, 141) rgb(7, 5, 141) rgb(7, 5, 141) rgb(7, 5, 141);
-    padding: 3px;
     max-width: 60px;
+    min-width: 60px;
+    min-height:33px;
     font-family: 'DSEG7Classic-Bold';
     background: rgb(0, 0, 0);
     color:rgb(255, 251, 4);
+    border-color: black;
 }
 
 /* Spin Buttons modified */
 input[type="number"].ledspinner::-webkit-outer-spin-button, 
 input[type="number"].ledspinner::-webkit-inner-spin-button {
     -webkit-appearance: none;
-    background: #FFF url(https://media.geeksforgeeks.org/wp-content/uploads/20190314004249/sample-image2.png) no-repeat center center;
+    background: #FFF url("./updown-mirage.png") no-repeat center center;
     width: 24px;
-    border-left: 1px solid rgb(7, 5, 141);
     opacity: 1; /* shows Spin Buttons per default (Chrome >= 39) */
     position: absolute;
     top: 0;

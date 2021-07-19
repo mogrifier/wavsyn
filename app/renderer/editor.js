@@ -55,11 +55,24 @@ var parameterScale = {'monomode':1, 'lfo_freq':1 , 'lfo_depth':1, 'osc_detune':1
 
 
 
+
 //generic method to update the value for a field/control given by the label.
 //called by UI. 
 function update(trigger) {
 
-    var label = trigger.id
+    //in the UI, y ranges from 0 to 30 (in the up/down arrow image)
+    var y = trigger.layerY
+    //middle of up/down arrow image
+    var midLine = 16
+    var delta = 1
+    if (y < midLine) {
+        delta = 1
+    }
+    else {
+        delta = -1
+    }
+
+    var label = trigger.target.id
     //check if midi is configured or not
     if (!isMidiConfigured) {
         //reset UI
@@ -69,24 +82,15 @@ function update(trigger) {
         return
     }
 
-/** I am blocking the holding of mouse down on the spinner to prevent it going too fast.
- * I need to implement min and max control for each id type- min and max are values of the trigger, so simple to get.
- * 
- * BUT i need to know if event was an up or down. where is that??. Can examine the event. the onclick mouse event has a
- * layerX and layerY value (and some others) that change depending on where you click. These appear to be realtive to the space you
- * click in so if you know that size, draw a horizontal line through it. Y above line is up, below line is down.
- * 
- */
-
     //unscaled value from UI
-    let newValue = parseInt(document.getElementById(label).value, 10) + 1
+    let newValue = parseInt(document.getElementById(label).value, 10) + delta
+    //range check the value
+    if (newValue < trigger.target.min || newValue > trigger.target.max) {
+        ///out of rnage so do nothing
+        return
+    }
+
     document.getElementById(label).value = newValue
-        //this is the current, scaled value (same as mirage internal value)
-        let currentValue = allPrograms[program - 1][label]
-    //compute delta as number of arrow presses needed
-    let delta = newValue - (currentValue / parameterScale[label])
-    //display as 2 digit decimal, like mirage
-    document.getElementById(label + "_display").value = newValue
     //update dirty flag- could make a 100% compare old vs new, but this is simple.
     setDirtyFlag(true)
     var data = new Object()
@@ -102,16 +106,6 @@ function update(trigger) {
     window.api.send('writeParameter', data)
 }
 
-
-function captureMouse(trigger) {
-    console.log('caught the mouse')
-    if (trigger == "down") {
-        return false
-    }
-    else {
-        return true
-    }
-}
 
 
 function getHexString(value){
@@ -235,14 +229,10 @@ function loadEditor() {
         else if (key == "wavesample") {
             //wavesample is zero-based in mirage, but UI in mirage and hence editor is 1-based
             document.getElementById(key).value = value + 1
-            document.getElementById(key + "_display").value = value + 1
         }
         else {
-            //go through the rest of the keys. those are the UI id's. set values. don't forget to rescale some.
-            //check if value needs to be rescaled from how Mirage stores to how UI displays.
+            //go through the rest of the keys. those are the UI id's. set values.
             document.getElementById(key).value = value
-            //reload the textfield, too.
-            document.getElementById(key + "_display").value = value
         }
     })
 }

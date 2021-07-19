@@ -9,22 +9,6 @@
     <title>Wavsyn - Tools for the Ensoniq Mirage</title>
 </head>
 <body>
-
-    spinner testing
-<br>
-
-
-          <fieldset>
-            <legend>Filter Envelope</legend>
-            <label for="cutoff">Filter Cutoff Frequency</label>
-            <input type="number" id="cutoff" class="ledspinner" value="0" min="0" max="31"  onclick="update(this)" 
-            onmousedown="return false"  />
-          </fieldset>
-          
-      end spinner test
-
-
-
     <main role="main" class="container-xl">
         Mirage Program Editor
 <table id="control" class="table table-sm">
@@ -97,11 +81,11 @@
     <table id="parameters" class="table table-sm">
         <thead class="thead-dark">
           <tr>
-            <th colspan="3">General</th>
+            <th colspan="2">General</th>
 
-            <th colspan="3">Filter Envelope</th>
+            <th colspan="2">Filter Envelope</th>
 
-            <th colspan="3">Amplitude Envelope</th>
+            <th colspan="2">Amplitude Envelope</th>
        
           </tr>
         </thead>
@@ -109,124 +93,103 @@
 
             <tr>
                 <td><label for="cutoff">Filter Cutoff Frequency</label></td>
-                <td><input type="range" id="cutoff" value="0" min="0" max="99" onchange="update(this)"></td>
-                <td><input type="text" style="background: rgb(150, 143, 172);max-width: 30px" id="cutoff_display" value="0" size="2" readonly></td>
+               
+                <td>
+                    <input type="number" id="cutoff" class="ledspinner" value="0" min="0" max="99" onclick="update(event)"
+                    onmousedown="return false">
+                </td>
                 
                 <td><label for="cutoff">Attack</label></td>
-                <td><input type="range" id="fea" value="0" min="0" max="31" onchange="update(this)"></td>
-                <td><input type="text" style="background: rgb(219, 233, 144);max-width: 30px" id="fea_display" value="0" size="2" readonly></td>
+               
+                <td><input type="number" id="fea" class="ledspinner" value="0" min="0" max="31" onclick="update(event)" onmousedown="return false"></td>
 
                 <td><label for="cutoff">Attack</label></td>
-                <td><input type="range" id="aea" value="0" min="0" max="31" onchange="update(this)"></td>
-                <td><input type="text" style="background: rgb(131, 208, 243);max-width: 30px" id="aea_display" value="0" size="2" readonly></td>
+               
+                <td><input type="number" id="aea" class="ledspinner" value="0" min="0" max="31" onclick="update(event)" onmousedown="return false"></td>
 
             </tr>
             <tr>
                 <td><label for="resonance">Filter Resonance</label></td>
-                <td><input type="range" id="resonance" value="00" min="0" max="40" onchange="update(this)"></td>
-                <td><input type="text"  style="background: rgb(0, 0, 0);color:rgb(255, 251, 4); max-width: 36px;font-family: 'Orbitron', sans-serif;" id="resonance_display" value="88" size="2" readonly></td>
+                <td><input type="number" id="resonance" class="ledspinner" value="0" min="0" max="40" onclick="update(event)" onmousedown="return false"></td>
+                
+                <td><label for="cutoff">Peak</label></td>
+                <td><input type="number" id="fep" class="ledspinner" value="0" min="0" max="31" onclick="update(event)" onmousedown="return false"></td>
 
                 <td><label for="cutoff">Peak</label></td>
-                <td><input type="range" id="fep" value="0" min="0" max="31" onchange="update(this)"></td>
-                <td><input type="text" id="fep_display" value="0" size="2" readonly></td>
-
-                <td><label for="cutoff">Peak</label></td>
-                <td><input type="range" id="aep" value="0" min="0" max="31" onchange="update(this)"></td>
-                <td><input type="text" id="aep_display" value="0" size="2" readonly></td>
+                <td><input type="number" id="aep" class="ledspinner" value="0" min="0" max="31" onclick="update(event)" onmousedown="return false"></td>
             </tr>
             <tr>
                 <td><label for="tracking">Filter Keyboard Tracking</label></td>
-                <td><input type="range" id="tracking" value="0" min="0" max="4" onchange="update(this)"></td>
-                <td><input type="text" id="tracking_display" value="0" size="2" readonly></td>
+                <td><input type="number" id="tracking" class="ledspinner" value="0" min="0" max="4" onclick="update(event)" onmousedown="return false"></td>
 
                 <td><label for="cutoff">Decay</label></td>
-                <td><input type="range" id="fed" value="0" min="0" max="31" onchange="update(this)"></td>
-                <td><input type="text" id="fed_display" value="0" size="2" readonly></td>
+                <td><input type="number" id="fed" class="ledspinner" value="0" min="0" max="31" onclick="update(event)" onmousedown="return false"></td>
 
                 <td><label for="cutoff">Decay</label></td>
-                <td><input type="range" id="aed" value="0" min="0" max="31" onchange="update(this)"></td>
-                <td><input type="text" id="aed_display" value="0" size="2" readonly></td>
+                <td><input type="number" id="aed" class="ledspinner" value="0" min="0" max="31" onclick="update(event)" onmousedown="return false"></td>
             </tr>
 
             <tr>
                 <td><label for="lfo_freq">LFO Frequency</label>
-                <td>  <input type="range" id="lfo_freq" value="0" min="0" max="99" onchange="update(this)"></td>
-                <td> <input type="text" id="lfo_freq_display" value="0" size="2" readonly></td>
+                <td><input type="number" id="lfo_freq" class="ledspinner" value="0" min="0" max="99" onclick="update(event)" onmousedown="return false"></td>
 
                 <td><label for="cutoff">Sustain</label></td>
-                <td><input type="range" id="fes" value="0" min="0" max="31" onchange="update(this)"></td>
-                <td><input type="text" id="fes_display" value="0" size="2" readonly></td>
+                <td><input type="number" id="fes" class="ledspinner" value="0" min="0" max="31" onclick="update(event)" onmousedown="return false"></td>
 
                 <td><label for="cutoff">Sustain</label></td>
-                <td><input type="range" id="aes" value="0" min="0" max="31" onchange="update(this)"></td>
-                <td><input type="text" id="aes_display" value="0" size="2" readonly></td>
+                <td><input type="number" id="aes" class="ledspinner" value="0" min="0" max="31" onclick="update(event)" onmousedown="return false"></td>
             </tr>
             <tr> 
                 <td><label for="lfo_depth">LFO Depth</label></td>
-                <td><input type="range" id="lfo_depth" value="0" min="0" max="99" onchange="update(this)"></td>
-                <td><input type="text" id="lfo_depth_display" value="0" size="2" readonly></td>
+                <td><input type="number" id="lfo_depth" class="ledspinner" value="0" min="0" max="99" onclick="update(event)" onmousedown="return false"></td>
 
                 <td><label for="cutoff">Release</label></td>
-                <td><input type="range" id="fer" value="0" min="0" max="31" onchange="update(this)"></td>
-                <td><input type="text" id="fer_display" value="0" size="2" readonly></td>
+                <td><input type="number" id="fer" class="ledspinner" value="0" min="0" max="31" onclick="update(event)" onmousedown="return false"></td>
 
                 <td><label for="cutoff">Release</label></td>
-                <td><input type="range" id="aer" value="0" min="0" max="31" onchange="update(this)"></td>
-                <td><input type="text" id="aer_display" value="0" size="2" readonly></td>
+                <td><input type="number" id="aer" class="ledspinner" value="0" min="0" max="31" onclick="update(event)" onmousedown="return false"></td>
             </tr>
 
             <tr>
                 <td><label for="osc_detune">OSC Detune</label></td>
-                <td><input type="range" id="osc_detune" value="0" min="0" max="99" onchange="update(this)"></td>
-                <td><input type="text" id="osc_detune_display" value="0" size="2" readonly></td>
+                <td><input type="number" id="osc_detune" class="ledspinner" value="0" min="0" max="99" onclick="update(event)" onmousedown="return false"></td>
 
                 <td><label for="cutoff">VS Attack</label></td>
-                <td><input type="range" id="feva" value="0" min="0" max="31" onchange="update(this)"></td>
-                <td><input type="text" id="feva_display" value="0" size="2" readonly></td>
+                <td><input type="number" id="feva" class="ledspinner" value="0" min="0" max="31" onclick="update(event)" onmousedown="return false"></td>
 
                 <td><label for="cutoff">VS Attack</label></td>
-                <td><input type="range" id="aeva" value="0" min="0" max="31" onchange="update(this)"></td>
-                <td><input type="text" id="aeva_display" value="0" size="2" readonly></td>
+                <td><input type="number" id="aeva" class="ledspinner" value="0" min="0" max="31" onclick="update(event)" onmousedown="return false"></td>
             </tr>
             <tr>
                 <td><label for="osc_mix">OSC Mix</label></td>
-                <td><input type="range" id="osc_mix" value="0" min="0" max="63" onchange="update(this)"></td>
-                <td><input type="text" id="osc_mix_display" value="0" size="2" readonly></td>
+                <td><input type="number" id="osc_mix" class="ledspinner" value="0" min="0" max="63" onclick="update(event)" onmousedown="return false"></td>
 
                 <td><label for="cutoff">VS Peak</label></td>
-                <td><input type="range" id="fevp" value="0" min="0" max="31" onchange="update(this)"></td>
-                <td><input type="text" id="fevp_display" value="0" size="2" readonly></td>
+                <td><input type="number" id="fevp" class="ledspinner" value="0" min="0" max="31" onclick="update(event)" onmousedown="return false"></td>
 
                 <td><label for="cutoff">VS Peak</label></td>
-                <td><input type="range" id="aevp" value="0" min="0" max="31" onchange="update(this)"></td>
-                <td><input type="text" id="aevp_display" value="0" size="2" readonly></td>
+                <td><input type="number" id="aevp" class="ledspinner" value="0" min="0" max="31" onclick="update(event)" onmousedown="return false"></td>
             </tr>
             <tr>
                 <td><label for="mix_velo">Mix VS</label></td>
-                <td><input type="range" id="mix_velo" value="0" min="0" max="31" onchange="update(this)"></td>
-                <td><input type="text" id="mix_velo_display" value="0" size="2" readonly></td>
+                <td><input type="number" id="mix_velo" class="ledspinner" value="0" min="0" max="31" onclick="update(event)" onmousedown="return false"></td>
 
                 <td><label for="cutoff">VS Decay</label></td>
-                <td><input type="range" id="fevd" value="0" min="0" max="31" onchange="update(this)"></td>
-                <td><input type="text" id="fevd_display" value="0" size="2" readonly></td>
+                <td><input type="number" id="fevd" class="ledspinner" value="0" min="0" max="31" onclick="update(event)" onmousedown="return false"></td>
 
                 <td><label for="cutoff">VS Decay</label></td>
-                <td><input type="range" id="aevd" value="0" min="0" max="31" onchange="update(this)"></td>
-                <td><input type="text" id="aevd_display" value="0" size="2" readonly></td>
+                <td><input type="number" id="aevd" class="ledspinner" value="0" min="0" max="31" onclick="update(event)" onmousedown="return false"></td>
             </tr>
 
             <tr>
                 <td><label for="wavesample">Wavesample</label></td>
-                <td><input type="range" id="wavesample" value="1" min="1" max="8" onchange="update(this)"></td>
-                <td><input type="text" id="wavesample_display" value="1" size="2" readonly></td>
+                <td><input type="number" id="wavesample" class="ledspinner" value="1" min="1" max="8" onclick="update(event)" onmousedown="return false"></td>
 
                 <td><label for="cutoff">VS Sustain</label></td>
-                <td><input type="range" id="fevs" value="0" min="0" max="31" onchange="update(this)"></td>
-                <td><input type="text" id="fevs_display" value="0" size="2" readonly></td>
+                <td><input type="number" id="fevs" class="ledspinner" value="0" min="0" max="31" onclick="update(event)" onmousedown="return false"></td>
 
                 <td><label for="cutoff">VS Sustain</label></td>
-                <td><input type="range" id="aevs" value="0" min="0" max="31" onchange="update(this)"></td>
-                <td><input type="text" id="aevs_display" value="0" size="2" readonly></td>
+                <td><input type="number" id="aevs" class="ledspinner" value="0" min="0" max="31" onclick="update(event)" onmousedown="return false"></td>
             </tr>
             <tr>    
                 <td>
@@ -246,12 +209,10 @@
                 </td>
                 <td></td>
                 <td><label for="cutoff">VS Release</label></td>
-                <td><input type="range" id="fevr" value="0" min="0" max="31" onchange="update(this)"></td>
-                <td><input type="text" id="fevr_display" value="0" size="2" readonly></td>
+                <td><input type="number" id="fevr" class="ledspinner" value="0" min="0" max="31" onclick="update(event)" onmousedown="return false"></td>
 
                 <td><label for="cutoff">VS Release</label></td>
-                <td><input type="range" id="aevr" value="0" min="0" max="31" onchange="update(this)"></td>
-                <td><input type="text" id="aevr_display" value="0" size="2" readonly></td>
+                <td><input type="number" id="aevr" class="ledspinner" value="0" min="0" max="31" onclick="update(event)" onmousedown="return false"></td>
             </tr>
 
 
@@ -289,6 +250,6 @@ What about same principles for a soundprocess editor? Does not look hard but hav
         <div class="container text-center">
     <small class="d-block mb-3 text-muted">Wavsyn © 2021 by Erich Izdepski</small>
     </div>
-    </footer>
+    </footer> 
 </body>
 </html>
