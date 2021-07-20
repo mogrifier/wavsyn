@@ -18,7 +18,7 @@ var mainWindow;
 
 const loadMainWindow = () => {
     mainWindow = new BrowserWindow({
-        width : 1200,
+        width : 1240,
         height: 900,
         webPreferences: {
           nodeIntegration: false, // is default value after Electron v5

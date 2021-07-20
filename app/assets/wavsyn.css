@@ -33,17 +33,17 @@ input[type="number"].ledspinner::-webkit-inner-spin-button {
 */
 legend {
     float: none;
-    margin-left: 10px;
-    margin-right: 10px;
     padding-right: 10px;
     padding-left: 10px;
     width: fit-content;
+    font-size: large;
+    font-weight: bold;
 }
 
 
 fieldset {
     padding:5px;
-    border:3px solid blue;
+    border:3px solid rgb(160, 25, 47);
     border-radius:8px;
     width: fit-content;
 }

@@ -410,6 +410,14 @@ window.api.receive('programDump', (event, args) => {
 window.api.receive('midiPorts', (event, arg) => {
     //parse the object containing the midi ports and display in the UI. 
     //never save- always keep fresh in case of system changes
+    var optionList = document.getElementById("midi_in")
+    while (optionList.firstChild) {
+        optionList.firstChild.remove()
+    }
+    optionList = document.getElementById("midi_out")
+    while (optionList.firstChild) {
+        optionList.firstChild.remove()
+    }
 
     //read the inputs
     for (var i = 0; i < arg["inputs"].length; i++) {
