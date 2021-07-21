@@ -6,17 +6,20 @@
 var midiIn
 var midiOut
 var isMidiConfigured = false
+var isEditorLoaded = false
 
 //program and sound used to set mirage up, once these are set, not used until they change. 
 //change should change mirage setting, so send sysex onChange()
-//range 1-6 modulo 3
+//range is 1-3. used in UI.
 var currentSound = 1
+var currentBank = "lower"
 //range 1 -4
 var program = 1
 //track editor changes
 var isDirty = false
-//default values
+//default values. range from 0- 6; 0 is for relaod.
 var loadSoundBank = 1
+//range 1-3 since you only save to current bank
 var saveSoundBank = 1
 
 
@@ -73,14 +76,15 @@ function update(trigger) {
     }
 
     var label = trigger.target.id
-    //check if midi is configured or not
-    if (!isMidiConfigured) {
+    //check if editor is loaded or not (can't load editor unless midi also configured)
+    if (!isEditorLoaded) {
         //reset UI
         document.getElementById(label).value = 0
         //pop warning
-        window.api.send('showWarning', "Please press 'Configure MIDI' and choose IN and OUT ports first.")
+        window.alert("Please load a sound to edit first.")
         return
     }
+
 
     //unscaled value from UI
     let newValue = parseInt(document.getElementById(label).value, 10) + delta
@@ -136,18 +140,16 @@ function getBankAndSound(sound) {
 
 /**
  * The radio buttons for mixmode and monomode need special handler
- * @param {radiobutton}  
-
  */
 function updateMode(trigger) {
 
-        //check if midi is configured or not
-        if (!isMidiConfigured) {
+        //check if editor is loaded or not (can't load editor unless midi also configured)
+        if (!isEditorLoaded) {
             //reset UI to default- making sure both off buttons are checked is correct deault state
             document.getElementById("mixmode_off").checked = "true"
             document.getElementById("monomode_off").checked = "true"
             //pop warning
-            window.api.send('showWarning', "Please press 'Configure MIDI' and choose IN and OUT ports first.")
+            window.alert("Please load a sound to edit first.")
             return
         }
 
@@ -164,17 +166,19 @@ function updateMode(trigger) {
     }
 
     if (trigger.value == "off") {
+        data["delta"] = -1
         data["value"] = 0
     }
     else{
+        data["delta"] = 1
         data["value"] = 1
     }
-    //send new value to Mirage. off = 0, on = 1
+    //send delta to Mirage. off = 0, on = 1
     data["midiIn"] = midiIn
     data["midiOut"] = midiOut
 
     //set value in allPrograms. no need to scale it.
-    allPrograms[program - 1][data["parameter"]] = data["value"]
+    allPrograms[program - 1][trigger.name] = data["value"]
     window.api.send('writeParameter', data)
 }
 
@@ -234,7 +238,9 @@ function loadEditor() {
             //go through the rest of the keys. those are the UI id's. set values.
             document.getElementById(key).value = value
         }
-    })
+    });
+
+    isEditorLoaded = true
 }
 
 
@@ -273,43 +279,69 @@ function configureMidi() {
  */
 function loadSound() {
 
-    //want a dirty warning but it needs to give user the choice of overriding unsaved sounds.
-    if (isDirty) {
-        //show warning
-        /**
-         * need to know bank and sound number from the currentsound status
-         */
-        let current = getBankAndSound(currentSound)
-        let bank = current["isLower"] ? "lower" : "upper"
-        var answer = window.confirm(`The editor has unsaved data. Save current sound to 
-            disk ${bank} to ${current["sound"]}?`);
-        if (answer) {
-            //this saves to CURRENT SOUND vice to the saveSoundBank since following a different path
-            //(assumption is you want to save to same bank you were editing; otherwise, you would use other method)
-            saveSound()
-        }
-        else {
-            return
-        }
-    }
-
     var data = new Object()
     data["midiIn"] = midiIn
     data["midiOut"] = midiOut
-    data = {...data, ...getBankAndSound(loadSoundBank)}
+
+    //0 means reload from current sound and bank without saving
+    if (loadSoundBank != 0) {
+        //want a dirty warning but it needs to give user the choice of overriding unsaved sounds.
+        if (isDirty) {
+            //show warning
+            var answer = window.confirm(`The editor has unsaved data. Save current sound to disk ${currentBank} ${currentSound}? You can click 'cancel' and then use 'Save Sound' to save to a different location.`);
+            if (answer) {
+                //this saves to CURRENT SOUND vice to the saveSoundBank since following a different path
+                //(assumption is you want to save to same bank you were editing; otherwise, you would use other method)
+                saveSound()
+            }
+            else {
+                //user clicked cancel, but loadsoundbank has changed. need to reset it.
+
+                return
+            }
+        }
+        data = {...data, ...getBankAndSound(loadSoundBank)}
+    }
+    else {
+        //make sure reload is loading lower or upper as appropriate
+        data["sound"] = currentSound
+        if (currentBank == "lower") {
+            data["isLower"] = true
+        }
+        else {
+            data["isLower"] = false
+        }
+    }
+    
     //this will display good log like "from lower bank sound 2"
     let bank = data["isLower"] ? "lower" : "upper"
-    console.log(`Loading current Mirage sound/programs from ${bank} bank sound ${data["sound"]}`)
-    //update UI so current sound/program match loaded
-    document.getElementById("currentsound").value = loadSoundBank
-    currentSound = loadSoundBank
+    showLogs(`Loading Mirage sound/programs from ${bank} bank sound ${data["sound"]}`)
+    //update UI so current sound/program match loaded.
+    document.getElementById("currentbankandsound").value = `${bank} ${data["sound"]}`
+    currentSound = data["sound"]
+    currentBank = bank
     setDirtyFlag(false)
     window.api.send('loadSound', data)
+
+    //update the savesound option list. Recall you can only save to whatever bank you loaded.
+    var legalBank = document.getElementById("savesoundbank")
+    //remove old options
+    while (legalBank.firstChild) {
+        legalBank.firstChild.remove()
+    }
+    //Create and append the options
+    for (var i = 1; i < 4; i++) {
+        var option = document.createElement("option");
+        option.value = i
+        option.text =  `${currentBank} ${i}`
+        legalBank.appendChild(option);
+    }
+    
 }
 
 
 /**
- * Set by changes to the UI dropdown list for selecting bank to load from
+ * Set by changes to the UI dropdown list for selecting bank to load from or a reload from current bank.
  */
 function setLoadSoundBank() {
     loadSoundBank = parseInt(document.getElementById("loadsoundbank").value)
@@ -344,19 +376,56 @@ function selectMidi(direction) {
  * This tells the Mirage to save the current sound/programs to disk. It DOES NOT send the program data
  * since that is already in the Mirage since the UI is in sync with the Mirage. 
  */
-function saveSound() {
+function saveSound(trigger) {
     var data = new Object()
+    data["command"] = "save sound"
     data["midiIn"] = midiIn
     data["midiOut"] = midiOut
-    data = {...data, ...getBankAndSound(saveSoundBank)}
-    let bank = data["isLower"] ? "lower" : "upper"
-    console.log(`Saving current Mirage sound/programs to  ${bank} bank sound ${data["sound"]}`)
+    var bank = ""
+
+    if (trigger == "savesound") {
+        //user clicked "Save Sound" from UI to trigger the save
+        data["sound"] = saveSoundBank
+        bank = currentBank
+    
+        if (currentSound != data["sound"]) {
+            //user is trying to save to a different bank or sound
+            var yes = window.confirm(`You are attempting to save the current sound to a different location. Are you sure?`);
+            if (!yes) {
+                //user clicked cancel
+                //at this point, the savesoundbank value was already updated because you selected it. Have to reset it.
+                //saveSoundBank = currentSound
+                return
+            }
+        }
+    }
+    else {
+        //save function triggered from a loadsound- default save to current sound bank
+        data["sound"] = currentSound
+        if (currentBank == "lower") {
+            data["isLower"] = true
+        }
+        else {
+            data["isLower"] = false
+        }
+        bank = data["isLower"] ? "lower" : "upper"
+    }
+
+    showLogs(`Saving current Mirage sound/programs to ${bank} bank sound ${data["sound"]}`)
     window.api.send('saveSound', data)
     //after a save there are editor editor changes so rest flag
     setDirtyFlag(false)
+    //whenever a sound is saved, that is what is loaded in mirage so update current sound
+    document.getElementById("currentbankandsound").value = `${bank} ${data["sound"]}`
+    currentBank = bank
+    currentSound = data["sound"]
 }
 
 
+function showLogs(message){
+    document.getElementById("logs").value += ("\n" + message)
+    console.log(message)
+}
 
 /**
  * Call back for recieving a program dump. Must parse it and SAVE it to all 4 programData objects
@@ -370,7 +439,7 @@ window.api.receive('programDump', (event, args) => {
     takes up 72 bytes. Math Check. 4 * 72 = 288.   288 + 192 + 1 = 481. 481 * 2 = 962. 962 + 288 = 1250.
     Sysex header is 4 bytes. Sysex ends with F7. So 5 bytes. 1255 -5 = 1250 nybbles. which form 625 bytes.
     */
-   console.log(`in received programDump. Triggered by event ${event}`)
+   showLogs(`in received programDump.`)
 
    //dumpData is all 4 programs
     var dumpData = new Array(288)
@@ -451,6 +520,6 @@ window.api.receive('midiPorts', (event, arg) => {
 window.api.receive('parameterValue', (event, arg) => {
 
     //update state of internal object that is copy of mirage program?? I think best to do update after getting the data back
-    console.log(`sysex from mirage: ${arg}`)
+    showLogs(`sysex from mirage: ${arg}`)
 
 })

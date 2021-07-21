@@ -35,23 +35,19 @@
         <div class="col-sm-3 gy-3">
             <input type = "button" id="loadsound" onclick = "loadSound()" class="btn btn-info" value="Load Sound" disabled>
             <select name="loadbank" id="loadsoundbank" class="custom-select" onchange="setLoadSoundBank()" disabled>
-                <option value="1">Lower 1</option>
-                <option value="2">Lower 2</option>
-                <option value="3">Lower 3</option>
-                <option value="4">Upper 1</option>
-                <option value="5">Upper 2</option>
-                <option value="6">Upper 3</option>
+                <option value="0">Reload</option>
+                <option value="1">lower 1</option>
+                <option value="2">lower 2</option>
+                <option value="3">lower 3</option>
+                <option value="4">upper 1</option>
+                <option value="5">upper 2</option>
+                <option value="6">upper 3</option>
                 </select>
         </div>
         <div class="col-sm-4 gy-3">
-            <input type = "button" id="savesound" onclick = "saveSound()" class="btn btn-secondary" value="Save Sound" disabled>
+            <input type = "button" id="savesound" onclick = "saveSound(this.id)" class="btn btn-secondary" value="Save Sound" disabled>
             <select name="savebank" id="savesoundbank" class="custom-select" onchange="setSaveSoundBank()" disabled>
-                <option value="1">Lower 1</option>
-                <option value="2">Lower 2</option>
-                <option value="3">Lower 3</option>
-                <option value="4">Upper 1</option>
-                <option value="5">Upper 2</option>
-                <option value="6">Upper 3</option>
+                <!-- have to load this dynamically based on the loaded bank (upper or lower)-->
                 </select>
         </div>
         <div class="col-sm-5 gy-3">
@@ -64,7 +60,7 @@
           <b>Currently Editing</b>
         </div>
         <div class="col-sm-4 gy-3">
-           <input type=text value="upper 1" id="" readonly>
+           <input type=text value="none" id="currentbankandsound" readonly>
         </div>
         <div class="col-sm-5 gy-3">
             <select name="program" id="program" class="custom-select" onchange="loadEditor()" disabled>
@@ -167,7 +163,7 @@
                 </div>
                 <div class="col-sm-7">
                     <input type="radio" id="monomode_on" name="monomode" value="on" onclick="updateMode(this)">
-                    <label for="monomode_on">&nbsp;on</label>
+                    <label for="monomode_on">&nbsp;on&nbsp;&nbsp;</label>
                     <input type="radio" id="monomode_off" name="monomode" value="off" checked onclick="updateMode(this)">
                     <label for="monomode_off">&nbsp;off</label>
                 </div>
@@ -179,7 +175,7 @@
                 </div>
                 <div class="col-sm-7">
                     <input type="radio" id="mixmode_on" name="mixmode" value="on" onclick="updateMode(this)">
-                    <label for="mixmode_on">&nbsp;on</label>
+                    <label for="mixmode_on">&nbsp;on&nbsp;&nbsp;</label>
                     <input type="radio" id="mixmode_off" name="mixmode" value="off" checked onclick="updateMode(this)">
                     <label for="mixmode_off">&nbsp;off</label> </div>
             </div>
@@ -434,8 +430,8 @@ Need to investigate a little. Tedious.
 What about same principles for a soundprocess editor? Does not look hard but have not got into the MIDI yet.
             -->
 
-    VS = Velocity Sensitivity
-
+    VS = Velocity Sensitivity<br>
+    <textarea id="logs" name="logs" rows = "3" cols="100" readonly></textarea>
 </main>
     <footer class="blog-footer">
         <div class="container text-center">

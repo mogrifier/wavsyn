@@ -197,10 +197,9 @@ ipcMain.on("saveSound", (event, args) => {
         mainWindow.webContents.send("programDump", Buffer.from(message));
       }
       else {
-        //error
-        console.log(`data does not contain a program dump of 1255 bytes; has ${message.length} bytes`);
+        //other midi recevied. hmm.
+        console.log(`data recevied: ${message}`);
       }
-      //midiInput.closePort()
     });
 
     var sysex = []
@@ -294,13 +293,10 @@ ipcMain.on("readParameter", (event, args) => {
         fullSysex = [...prefix, [15], ...suffix]
       }
 
-      //now send it
-      for (var i = 0; i < Math.abs(delta); i++) {
-        midiOutput.sendMessage(fullSysex)
-        console.log("sent sysex")
-      }
-
-      //close output and input9
+      //now send it. we only send a single up or down arrow at a time
+      midiOutput.sendMessage(fullSysex)
+      console.log(`sent ${fullSysex}`)
+      //close output and input
       midiOutput.closePort()
       //closing here since multiple messages were sent and there may be several callbacks
       midiInput.closePort()

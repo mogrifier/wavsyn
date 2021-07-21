@@ -40,6 +40,9 @@ legend {
     font-weight: bold;
 }
 
+label {
+    vertical-align: middle;
+}
 
 fieldset {
     padding:5px;
