@@ -238,6 +238,17 @@ ipcMain.on("readParameter", (event, args) => {
   })
   
 
+ipcMain.on("changeProgram", (event, args) => {
+  /** data["midiIn"] = midiIn
+      data["midiOut"] = midiOut
+      data["program"] = program 
+      */
+
+    //the command is simply prog X. returns 07 X
+    sendSysex(args["midiIn"], args["midiOut"], [0, args["program"] ] )
+  })
+
+
 /**
  * There is no single write command. You send the number of up or down arrow commands to execute.
  */

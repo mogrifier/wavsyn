@@ -241,6 +241,13 @@ function loadEditor() {
     });
 
     isEditorLoaded = true
+    //now change program on the Mirage
+    //f0 0f 01 01 00 x 7f f7 where x is program number
+    var data = new Object()
+    data["midiIn"] = midiIn
+    data["midiOut"] = midiOut
+    data["program"] = program
+    window.api.send('changeProgram', data)
 }
 
 
@@ -295,8 +302,7 @@ function loadSound() {
                 saveSound()
             }
             else {
-                //user clicked cancel, but loadsoundbank has changed. need to reset it.
-
+                //user clicked cancel
                 return
             }
         }
@@ -317,6 +323,7 @@ function loadSound() {
     let bank = data["isLower"] ? "lower" : "upper"
     showLogs(`Loading Mirage sound/programs from ${bank} bank sound ${data["sound"]}`)
     //update UI so current sound/program match loaded.
+    document.getElementById("program").value = 1
     document.getElementById("currentbankandsound").value = `${bank} ${data["sound"]}`
     currentSound = data["sound"]
     currentBank = bank

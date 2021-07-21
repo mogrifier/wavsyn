@@ -34,7 +34,7 @@ contextBridge.exposeInMainWorld(
         send: (channel, data) => {
             // whitelist channels
             let validChannels = ["toMain", "selectDirectory", "showWarning", "saveLogs", "getMidiPorts",
-              "saveSound", "loadSound", "readParameter", "writeParameter"];
+              "saveSound", "loadSound", "readParameter", "writeParameter", "changeProgram"];
             if (validChannels.includes(channel)) {
                 ipcRenderer.send(channel, data);
                 console.log(`in method send; sending ${data} to channel ${channel}`);
@@ -44,7 +44,8 @@ contextBridge.exposeInMainWorld(
             }
         },
         receive: (channel, data) => {
-            let validChannels = ["fromMain", "selectDirectory", "midiPorts", "parameterValue", "programDump"];
+            let validChannels = ["fromMain", "selectDirectory", "midiPorts", "parameterValue", "programDump",
+            "changeProgram"];
             if (validChannels.includes(channel)) {
               if (data != undefined){
                 console.log(`in method receive; got data from channel ${channel}`);
