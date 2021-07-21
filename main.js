@@ -197,8 +197,8 @@ ipcMain.on("saveSound", (event, args) => {
         mainWindow.webContents.send("programDump", Buffer.from(message));
       }
       else {
-        //other midi recevied. hmm.
-        console.log(`data recevied: ${message}`);
+        //other midi received. hmm.
+        console.log(`data received: ${message}`);
       }
     });
 

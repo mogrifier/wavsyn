@@ -405,6 +405,13 @@ function saveSound(trigger) {
                 return
             }
         }
+
+        if (bank == "lower") {
+            data["isLower"] = true
+        }
+        else {
+            data["isLower"] = false
+        }
     }
     else {
         //save function triggered from a loadsound- default save to current sound bank
