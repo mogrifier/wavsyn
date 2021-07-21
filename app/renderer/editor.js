@@ -431,6 +431,7 @@ function saveSound(trigger) {
 
 function showLogs(message){
     document.getElementById("logs").value += ("\n" + message)
+    document.getElementById("logs").scrollTop = document.getElementById("logs").scrollHeight;
     console.log(message)
 }
 
