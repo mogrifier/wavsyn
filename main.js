@@ -250,7 +250,7 @@ ipcMain.on("changeProgram", (event, args) => {
 
 
 /**
- * There is no single write command. You send the number of up or down arrow commands to execute.
+ * There is no single write command. You send an up or down arrow. (1 for each value change)
  */
 
   ipcMain.on("writeParameter", (event, args) => {

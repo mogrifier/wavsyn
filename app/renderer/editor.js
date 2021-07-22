@@ -11,14 +11,14 @@ var isEditorLoaded = false
 //program and sound used to set mirage up, once these are set, not used until they change. 
 //change should change mirage setting, so send sysex onChange()
 //range is 1-3. used in UI.
-var currentSound = 1
-var currentBank = "lower"
+var currentSound = -1
+var currentBank = "empty"
 //range 1 -4
 var program = 1
 //track editor changes
 var isDirty = false
 //default values. range from 0- 6; 0 is for relaod.
-var loadSoundBank = 1
+var loadSoundBank = 0
 //range 1-3 since you only save to current bank
 var saveSoundBank = 1
 
@@ -241,6 +241,11 @@ function loadEditor() {
     });
 
     isEditorLoaded = true
+    //update or create the amplitude and filter charts
+    renderChart()
+
+
+
     //now change program on the Mirage
     //f0 0f 01 01 00 x 7f f7 where x is program number
     var data = new Object()
@@ -299,7 +304,7 @@ function loadSound() {
             if (answer) {
                 //this saves to CURRENT SOUND vice to the saveSoundBank since following a different path
                 //(assumption is you want to save to same bank you were editing; otherwise, you would use other method)
-                saveSound()
+                saveSound("to current sound")
             }
             else {
                 //user clicked cancel
@@ -308,8 +313,8 @@ function loadSound() {
         }
         data = {...data, ...getBankAndSound(loadSoundBank)}
     }
-    else {
-        //make sure reload is loading lower or upper as appropriate
+    else if (currentSound > -1) {
+        //make sure reload is loading lower or upper as appropriate. Can't do a reload unless there is already a sound loaded
         data["sound"] = currentSound
         if (currentBank == "lower") {
             data["isLower"] = true
@@ -318,18 +323,23 @@ function loadSound() {
             data["isLower"] = false
         }
     }
+    else {
+        //no soud loaded so no reload.
+        window.alert("You must load a sound before you can perform a reload.")
+        return
+    }
     
     //this will display good log like "from lower bank sound 2"
     let bank = data["isLower"] ? "lower" : "upper"
     showLogs(`Loading Mirage sound/programs from ${bank} bank sound ${data["sound"]}`)
+    window.api.send('loadSound', data)
     //update UI so current sound/program match loaded.
     document.getElementById("program").value = 1
     document.getElementById("currentbankandsound").value = `${bank} ${data["sound"]}`
-    currentSound = data["sound"]
-    currentBank = bank
     setDirtyFlag(false)
-    window.api.send('loadSound', data)
-
+    //update internal state variables (a reload does not change these, but regular load will)
+    currentBank = bank
+    currentSound = data["sound"]
     //update the savesound option list. Recall you can only save to whatever bank you loaded.
     var legalBank = document.getElementById("savesoundbank")
     //remove old options
@@ -344,6 +354,9 @@ function loadSound() {
         legalBank.appendChild(option);
     }
     
+    //select upper or lower program 1 in mirage. always set to 1 after load.
+    data["program"] = 1
+    window.api.send('changeProgram', data)
 }
 
 
@@ -399,9 +412,6 @@ function saveSound(trigger) {
             //user is trying to save to a different bank or sound
             var yes = window.confirm(`You are attempting to save the current sound to a different location. Are you sure?`);
             if (!yes) {
-                //user clicked cancel
-                //at this point, the savesoundbank value was already updated because you selected it. Have to reset it.
-                //saveSoundBank = currentSound
                 return
             }
         }
@@ -538,3 +548,38 @@ window.api.receive('parameterValue', (event, arg) => {
     showLogs(`sysex from mirage: ${arg}`)
 
 })
+
+
+function renderChart() {
+
+    var filterCtx = document.getElementById('filteradsr').getContext('2d');
+    var amplitudeCtx = document.getElementById('amplitudeadsr').getContext('2d');
+
+    //data comes from current loaded program. also has to chage on updates to data.
+
+    //change to scatter with x,y data plus connected points
+    //https://stackoverflow.com/questions/46232699/display-line-chart-with-connected-dots-using-chartjs
+
+    const labels = ["attack", "decay", "sustain", "release", ""]
+    var myChart = new Chart(amplitudeCtx, {
+        type: 'line', data : {
+          labels: labels,
+          datasets: [{
+            label: 'Amplitude',
+            //must make sense of this. 0, peak, sustain, sustain, 0
+            data: [0, 25, 15, 15, 0],
+            fill: false,
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1
+          }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    }
