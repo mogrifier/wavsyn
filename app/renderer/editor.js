@@ -21,7 +21,9 @@ var isDirty = false
 var loadSoundBank = 0
 //range 1-3 since you only save to current bank
 var saveSoundBank = 1
-
+//charts for adsr
+var amplitudeChart
+var filterChart
 
 //program data for current sound. 4 pgroams. Note the program variable starts at 1. this holds
 //an object with key (param name from UI) value pairs. Value is from Mirage. The UI code has to
@@ -108,6 +110,9 @@ function update(trigger) {
     allPrograms[program - 1][label] = newValue * parameterScale[label]
 
     window.api.send('writeParameter', data)
+
+    //update or create the amplitude and filter charts
+    renderChart()
 }
 
 
@@ -243,9 +248,6 @@ function loadEditor() {
     isEditorLoaded = true
     //update or create the amplitude and filter charts
     renderChart()
-
-
-
     //now change program on the Mirage
     //f0 0f 01 01 00 x 7f f7 where x is program number
     var data = new Object()
@@ -556,34 +558,104 @@ window.api.receive('parameterValue', (event, arg) => {
 
 function renderChart() {
 
+    if (filterChart != undefined)
+    {
+        filterChart.destroy()
+    }
+
+    if (amplitudeChart != undefined)
+    {
+        amplitudeChart.destroy()
+    }
     var filterCtx = document.getElementById('filteradsr').getContext('2d');
     var amplitudeCtx = document.getElementById('amplitudeadsr').getContext('2d');
-
     //data comes from current loaded program. also has to chage on updates to data.
-
+    var dataset = createChartData()
     //change to scatter with x,y data plus connected points
     //https://stackoverflow.com/questions/46232699/display-line-chart-with-connected-dots-using-chartjs
+    amplitudeChart = new Chart(amplitudeCtx, dataset.amplitude);
+    filterChart = new Chart(filterCtx, dataset.filter);
+}
+
+
+
+function createChartData() {
+    //create a json dataset for the given program for filter and amplitude adsr
 
     const labels = ["attack", "decay", "sustain", "release", ""]
-    var myChart = new Chart(amplitudeCtx, {
-        type: 'line', data : {
+
+    //recall program is zero based so need to subtract 1. Scaling NOT required since ADSRP values are not scaled.
+    var attack = allPrograms[program - 1]["aea"]
+    var decay = allPrograms[program - 1]["aed"]
+    var sustain = allPrograms[program - 1]["aes"]
+    var release = allPrograms[program - 1]["aer"]
+    var peak = allPrograms[program - 1]["aep"]
+    var amplitudeData = [{x: 0, y: 0}, {x: attack, y: peak }, {x: attack + decay, y: sustain}, 
+        {x: attack + decay + 30, y: sustain}, {x: attack + decay + 30 + release, y: 0}]
+    var dataset = new Object()
+    dataset.amplitude = {
+        type: 'scatter', data : {
           labels: labels,
           datasets: [{
-            label: 'Amplitude',
-            //must make sense of this. 0, peak, sustain, sustain, 0
-            data: [0, 25, 15, 15, 0],
+            label: 'Amplitude ADSR',
+            data: amplitudeData,
             fill: false,
-            borderColor: 'rgb(75, 192, 192)',
-            tension: 0.1
+            borderColor: 'rgb(5, 39, 194)',
+            tension: 0.1,
+            showLine:true
           }]
         },
         options: {
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    max: 35
+                },
+                x: {
+                    max: 130
                 }
+            },
+            animation: {
+                duration: 0
             }
         }
-    });
-    
     }
+
+    attack = allPrograms[program - 1]["fea"]
+    decay = allPrograms[program - 1]["fed"]
+    sustain = allPrograms[program - 1]["fes"]
+    release = allPrograms[program - 1]["fer"]
+    peak = allPrograms[program - 1]["fep"]
+    var filterData = [{x: 0, y: 0}, {x: attack, y: peak }, {x: attack + decay, y: sustain}, 
+        {x: attack + decay + 30, y: sustain}, {x: attack + decay + 30 + release, y: 0}]
+
+    dataset.filter = {
+        type: 'scatter', data : {
+          labels: labels,
+          datasets: [{
+            label: 'Filter ADSR',
+            data: filterData,
+            fill: false,
+            borderColor: 'rgb(160, 25, 47)',
+            tension: 0.1,
+            showLine:true
+          }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 35
+                },
+                x: {
+                    max: 130
+                }
+            },
+            animation: {
+                duration: 0
+            }
+        }
+    }
+
+    return dataset
+}
