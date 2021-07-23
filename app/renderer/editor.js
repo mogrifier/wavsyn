@@ -353,7 +353,11 @@ function loadSound() {
         option.text =  `${currentBank} ${i}`
         legalBank.appendChild(option);
     }
-    
+    //default saveSoundBank and UI selector to current sound
+    saveSoundBank = currentSound
+    document.getElementById("savesoundbank").value = saveSoundBank
+
+
     //select upper or lower program 1 in mirage. always set to 1 after load.
     data["program"] = 1
     window.api.send('changeProgram', data)

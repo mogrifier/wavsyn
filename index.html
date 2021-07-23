@@ -11,6 +11,7 @@
 
 <body>
     <main role="main" class="container-xl">
+      Mirage Audio Processor
 <table id="t" class="table table-sm">
     <thead class="thead-dark">
       <tr>
@@ -32,9 +33,9 @@
             </select></td>
         <td></td>
       </tr>
-      <tr style="height: 80px;" align="top">
+      <tr style="height: 80px;">
           <!-- this has default value. better to auto initialize in preload-->
-        <td id="functionHelp" colspan="3" bgcolor="yellow">Convert 32 bit float files to 8 bit</td>
+        <td id="functionHelp" colspan="3" bgcolor="#FFFF00">Convert 32 bit float files to 8 bit</td>
       </tr>
       <tr>
         <td>Choose the Destination Folder for the process</td>
@@ -52,8 +53,8 @@
   </colgroup> 
 <thead class="thead-dark">
   <tr>
-    <th>Run a Step</th>
-    <th>Run a Workflow</th>
+    <th>Processing</th>
+    <!--<th>Run a Workflow</th> -->
   </tr>
 </thead>
 <tbody>
@@ -61,15 +62,19 @@
 <td>
   <input type = "button" onclick = "execute()" class="btn btn-success" value = "Run Process">  
 </td>
-<td>
+<!--
+  <td>
   <input type = "button" class="btn btn-secondary" onclick = "addWorkflowStep()" value = "Add Step">
   &nbsp;  &nbsp;
   <input type = "button" class="btn btn-primary"  onclick = "runWorkflow()" value = "Run Workflow">  
 </td>
+-->
   </tr>
 <tr>
-  <td><textarea id="logs" name="logs" rows = "15" cols="70" readonly>logs</textarea></td>
+  <td><textarea id="logs" name="logs" rows = "15" cols="150" readonly>logs</textarea></td>
+  <!--
   <td>put workflow stuff here</td>
+  -->
 </tr>
 </tbody>
 </table>
