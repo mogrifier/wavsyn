@@ -182,6 +182,7 @@ ipcMain.on("saveSound", (event, args) => {
     let midiIn = args["midiIn"]
     let midiOut = args["midiOut"]
     let isLower = args["isLower"]
+    let isLowerProgram = args["isLowerProgram"]
     let sound = args["sound"]
     midiOutput = new midi.Output();
     midiInput = new midi.Input();
@@ -197,7 +198,7 @@ ipcMain.on("saveSound", (event, args) => {
         mainWindow.webContents.send("programDump", Buffer.from(message));
       }
       else {
-        //other midi received. hmm.
+        //other midi received.
         console.log(`data received: ${message}`);
       }
     });
@@ -214,7 +215,20 @@ ipcMain.on("saveSound", (event, args) => {
     var prefix = [240, 15, 1, 1]
     var suffix = [127, 247]
     var fullSysex = [...prefix, ...sysex, ...suffix]
-    console.log(`sending sysex command ${fullSysex}`)
+    console.log(`sending sysex command loadSound ${fullSysex}`)
+    midiOutput.sendMessage(fullSysex)
+
+    //now change the program bank to match. Always setting to program 1 after a loadsound
+    if (isLowerProgram  == isLower) {
+      //no bank change
+      sysex = [0, 1 ] 
+    }
+    else {
+      //bank change
+      sysex = [0, 0, 1] 
+    }
+    fullSysex = [...prefix, ...sysex, ...suffix]
+    console.log(`sending sysex command changeProgram ${fullSysex}`)
     midiOutput.sendMessage(fullSysex)
     midiOutput.closePort()
 })
@@ -223,29 +237,46 @@ ipcMain.on("saveSound", (event, args) => {
 ipcMain.on("readParameter", (event, args) => {
   /** data["midiIn"] = midiIn
       data["midiOut"] = midiOut
-      data["isLower"] = isLower
-      data["sound"] = sound 
-      data["programs"] = program 
       data["parameter"] = parameter
-      
       send syex to Mirage to read a parameter*/
-
       //need parameters as two digits- decimal integers
-    let d1 = parseInt(args["parameter"].charAt[0])
-    let d2 = parseInt(args["parameter"].charAt[1])
-    //the command means (12) for parameter d1d2 (13) read the value (since none is given)
-    sendSysex(args["midiIn"], args["midiOut"], [12, d1, d2, 13] )
+    let d1 = parseInt(args["parameter"].charAt(0))
+    let d2 = parseInt(args["parameter"].charAt(1))
+    // Set up a new output.
+    midiOutput = new midi.Output();
+    midiInput = new midi.Input();
+    // Configure a callback.
+    midiInput.on('message', (deltaTime, message) => {
+      mainWindow.webContents.send("parameterValue", Buffer.from(message));
+      console.log(`readParameter received: ${message} d: ${deltaTime}`);
+      midiInput.closePort()
+    });
+  
+      midiInput.openPort(parseInt(args["midiIn"]));
+      //turn on listening for sysex messages (ignores timing and active sensing)
+      midiInput.ignoreTypes(false, true, true);
+      midiOutput.openPort(parseInt(args["midiOut"]));
+      //the command means (12) for parameter d1d2 (13) read the value (since none is given)
+      //f0 0f 01 01 0c 03 07 0d 7f f7 
+      let sx = [240, 15, 1, 1, 12, d1, d2, 13, 127, 247]
+      console.log(`sending readParameter sysex ${sx}`)
+      midiOutput.sendMessage(sx)
+      // Close the port when done.
+      midiOutput.closePort();
   })
   
 
+  /**
+   * since setting the program bank in the loadSound command, this command NEVER has to change the bank,
+   * simplifying the logic.
+   */
 ipcMain.on("changeProgram", (event, args) => {
   /** data["midiIn"] = midiIn
       data["midiOut"] = midiOut
       data["program"] = program 
       */
-
-    //the command is simply prog X. returns 07 X
-    sendSysex(args["midiIn"], args["midiOut"], [0, args["program"] ] )
+      console.log(`sending changeProgram sysex; changing to program ${args["program"]}`)
+      sendSysex(args["midiIn"], args["midiOut"], [0, args["program"] ] )
   })
 
 
@@ -306,7 +337,7 @@ ipcMain.on("changeProgram", (event, args) => {
 
       //now send it. we only send a single up or down arrow at a time
       midiOutput.sendMessage(fullSysex)
-      console.log(`sent ${fullSysex}`)
+      console.log(`send writeParameter ${fullSysex}`)
       //close output and input
       midiOutput.closePort()
       //closing here since multiple messages were sent and there may be several callbacks

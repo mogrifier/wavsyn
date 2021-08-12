@@ -3,8 +3,8 @@
 //would like to use same listeners but with some extra parameters to identify
 //which sound/program was being edited.
 //user sets these. all midi functions must use them. 
-var midiIn
-var midiOut
+var midiIn = -1
+var midiOut = -1
 var isMidiConfigured = false
 var isEditorLoaded = false
 
@@ -15,6 +15,7 @@ var currentSound = -1
 var currentBank = "empty"
 //range 1 -4
 var program = 1
+var isLowerProgram = true
 //track editor changes
 var isDirty = false
 //default values. range from 0- 6; 0 is for relaod.
@@ -192,6 +193,7 @@ function updateMode(trigger) {
 function loadEditorFromDump() {
     //since from a dump, the editor has no changes 
     setDirtyFlag(false)
+    isEditorLoaded = true
     loadEditor()
 }
 
@@ -199,6 +201,16 @@ function loadEditorFromDump() {
  * Load the UI editor with data from the program selected or just loaded from mirage.
  */
 function loadEditor() {
+
+    //check if editor is loaded or not (can't load editor unless midi also configured)
+    if (!isEditorLoaded) {
+        //reset UI to default value
+        document.getElementById("program").value = program
+        //pop warning
+        window.alert("Please load a sound to edit first.")
+        return
+    }
+
     //just changing the program does not change if dirty or not (unless I switch to tracking at program level vice globally)
     program = parseInt(document.getElementById("program").value)
     //get program info from allPrograms (since already loaded from Mirage and in sync)s)
@@ -277,13 +289,6 @@ function setDirtyFlag(status) {
 function configureMidi() {
     //load the midi ports into the UI
     window.api.send('getMidiPorts')
-    isMidiConfigured = true
-    //enable UI to use save button and selectors
-    document.getElementById("program").removeAttribute('disabled')
-    document.getElementById("savesoundbank").removeAttribute('disabled')
-    document.getElementById("savesound").removeAttribute('disabled')
-    document.getElementById("loadsoundbank").removeAttribute('disabled')
-    document.getElementById("loadsound").removeAttribute('disabled')
 }
 
 
@@ -296,6 +301,7 @@ function loadSound() {
     var data = new Object()
     data["midiIn"] = midiIn
     data["midiOut"] = midiOut
+    data["isLowerProgram"] = isLowerProgram
 
     //0 means reload from current sound and bank without saving
     if (loadSoundBank != 0) {
@@ -342,6 +348,7 @@ function loadSound() {
     //update internal state variables (a reload does not change these, but regular load will)
     currentBank = bank
     currentSound = data["sound"]
+    isLowerProgram = data["isLower"]
     //update the savesound option list. Recall you can only save to whatever bank you loaded.
     var legalBank = document.getElementById("savesoundbank")
     //remove old options
@@ -395,8 +402,28 @@ function selectMidi(direction) {
         midiOut = document.getElementById("midi_out").value
     }
 
+    if (midiIn > -1 & midiOut > -1) {
+        //verify mirage comms
+        verifyComms()
+        //means user has selected in and out ports; does NOT mean it is correct
+        isMidiConfigured = true
+        //enable UI to use save button and selectors
+        document.getElementById("program").removeAttribute('disabled')
+        document.getElementById("savesoundbank").removeAttribute('disabled')
+        document.getElementById("savesound").removeAttribute('disabled')
+        document.getElementById("loadsoundbank").removeAttribute('disabled')
+        document.getElementById("loadsound").removeAttribute('disabled')
+    }
 }
 
+
+function verifyComms() {
+    var data = new Object()
+    data["midiIn"] = midiIn
+    data["midiOut"] = midiOut
+    data["parameter"] = "36"
+    window.api.send('readParameter', data)
+}
 
 /**
  * This tells the Mirage to save the current sound/programs to disk. It DOES NOT send the program data
@@ -457,6 +484,32 @@ function showLogs(message){
     document.getElementById("logs").scrollTop = document.getElementById("logs").scrollHeight;
     console.log(message)
 }
+
+
+window.api.receive('parameterValue', (event, args) => {
+          /*
+      returns: F0 0F 01 0D 10 25 00 05 F7
+        0d = value requested
+        10 = program (program is zero based. Lower 1,2,3,4 = 00, 01, 02, 03; Upper 1,2,3,4 = 10, 11, 12, 13 - note extra bit flipped to mean upper)
+
+        just reading parameter 21 to get a string back that identifies:
+        1) did midi comms work
+        2) what program and bank is being edited as indicated by byte 4 (0-based)
+        */
+    if (args[4] < 4) {
+        //lower bank
+        showLogs(`lower bank ${args[4] + 1} being edited`)
+        isLowerProgram = true
+    }
+    else {
+        //upper bank
+        showLogs(`upper bank ${args[4] - 15} being edited`)
+        isLowerProgram = false
+    }
+
+
+})
+
 
 /**
  * Call back for recieving a program dump. Must parse it and SAVE it to all 4 programData objects
@@ -520,11 +573,16 @@ window.api.receive('midiPorts', (event, arg) => {
     }
 
     //read the inputs
+    var inputList = document.getElementById("midi_in")
+    var option = document.createElement("option");
+    option.value = -1
+    option.text = "select input"
+    inputList.appendChild(option);
     for (var i = 0; i < arg["inputs"].length; i++) {
         //load the dropdown lists
-        var inputList = document.getElementById("midi_in")
         //Create and append the options
-        var option = document.createElement("option");
+        option = document.createElement("option");
+        //I know there is only one 'k'
         for (var k in arg["inputs"][i]) {
             option.value = arg["inputs"][i][k]
             option.text = k
@@ -532,10 +590,14 @@ window.api.receive('midiPorts', (event, arg) => {
         inputList.appendChild(option);
     }
 
+    var outputList = document.getElementById("midi_out")
+    option = document.createElement("option");
+    option.value = -1
+    option.text = "select output"
+    outputList.appendChild(option);
     //now read the outputs and load
     for (i = 0; i < arg["outputs"].length; i++) {
         //load the dropdown lists
-        var outputList = document.getElementById("midi_out")
         //Create and append the options
         option = document.createElement("option");
         for (k in arg["outputs"][i]) {
