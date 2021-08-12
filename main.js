@@ -495,7 +495,7 @@ const template = [
   {
     label: 'Window',
     submenu: [
-      { label: 'Wavsyn', 
+      { label: 'Audio Processor', 
       click() { 
         //load main view (which is also default)
         mainWindow.loadFile(path.join(__dirname, "index.html"));
