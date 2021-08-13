@@ -1,7 +1,7 @@
 {
   "name": "wavsyn",
-  "version": "1.0.7",
-  "description": "Tools for creating disk images and editing sounds on the Ensoniq Mirage",
+  "version": "1.0.8",
+  "description": "Tools for audio processing, creating disk images, and editing programs on the Ensoniq Mirage.",
   "main": "main.js",
   "scripts": {
     "start": "electron-forge start",
@@ -9,7 +9,8 @@
     "lint": "eslint app/** -f html -o ./lint/report.html --cache:true",
     "package": "electron-forge package",
     "publish": "electron-forge publish",
-    "make": "electron-forge make --targets @electron-forge/maker-squirrel,@electron-forge/maker-zip"
+    "make": "electron-forge make --targets @electron-forge/maker-squirrel,@electron-forge/maker-zip",
+    "make-mac-deb": "electron-forge make --targets @electron-forge/maker-dmg,@electron-forge/maker-deb"
   },
   "repository": {
     "type": "git",
@@ -73,6 +74,10 @@
         },
         {
           "name": "@electron-forge/maker-rpm",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-dmg",
           "config": {}
         }
       ],

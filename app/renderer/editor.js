@@ -562,6 +562,14 @@ window.api.receive('programDump', (event, args) => {
  * */
 window.api.receive('midiPorts', (event, arg) => {
     //parse the object containing the midi ports and display in the UI. 
+
+    //if there is a problem with no ports found, show warning and return
+    if (arg["inputs"].length == 0 | arg["outputs"].length ==0) {
+        //missing required inputs
+        window.alert("The required MIDI input and/or output ports were not found.")
+        return
+    }
+
     //never save- always keep fresh in case of system changes
     var optionList = document.getElementById("midi_in")
     while (optionList.firstChild) {
