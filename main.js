@@ -498,13 +498,13 @@ const template = [
       { label: 'Audio Processor', 
       click() { 
         //load main view (which is also default)
-        mainWindow.loadFile(path.join(__dirname, "index.html"));
+        mainWindow.loadFile(path.join(__dirname, "/app/pages/audio.html"));
     } 
      },
      { label: 'Editor', 
       click() { 
         //load editor html file
-        mainWindow.loadFile(path.join(__dirname, "/app/pages/editor.html"));
+        mainWindow.loadFile(path.join(__dirname, "index.html"));
 
     }},
       { role: 'minimize' },
