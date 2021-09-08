@@ -80,9 +80,8 @@ var allTools = {
             //will not process filenames with spaces. tried single quotes and did not work, even though does in powershell.
             let command = "hxcfe -finput:" + source  + path.sep + fileName + " -foutput:" 
                 + destination + path.sep + path.parse(fileName).name + ".hfe"
-                + " -conv -ifmode:GENERIC_SHUGART_DD_FLOPPYMODE -uselayout:ENSONIQ_MIRAGE_440KB"
+                + " -conv -ifmode:GENERIC_SHUGART_DD_FLOPPYMODE"
             //var msg = exec("hxcfe -finput:${source}\\analog.edm -foutput:${destination}\\analog.hfe -conv -ifmode:GENERIC_SHUGART_DD_FLOPPYMODE")
-            //layout: ENSONIQ_MIRAGE_440KB :  Ensoniq Mirage 3"5 DD Floppy Disk. This lets command work with img or edm files.
             console.log(command)
             let msg = exec(command)
 
@@ -210,7 +209,7 @@ var allTools = {
 
 
     help: {"writeDiskImage":`Write a mirage disk image from 384KB source audio files. Files must be unsigned 8 bit,
-     mono, PCM. The wave header will be removed if present. This creates a 440KB disk image file (extensioon .edm) for use with 
+     mono, PCM. The wave header will be removed if present. This creates a 440KB disk image file (extension .edm) for use with 
     Omniflop or conversion to HFE. See the Software menu to download additional tools.`, 
 
     "convert_to_hfe":`Convert a disk image to hfe. You need to have HxCFloppyEmulator installed AND on your PATH. 
