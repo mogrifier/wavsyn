@@ -13,6 +13,7 @@ var isEditorLoaded = false
 //range is 1-3. used in UI.
 var currentSound = -1
 var currentBank = "empty"
+var currentParam = ""
 //range 1 -4
 var program = 1
 var isLowerProgram = true
@@ -729,3 +730,79 @@ function createChartData() {
 
     return dataset
 }
+
+
+
+function setCurrentLabel(event) {
+    var text = event.target.localName
+    if (text.includes("label")) {
+        currentParam = event.target.htmlFor
+    }
+    
+}
+
+/*
+window.addEventListener("click", function (event) {
+
+    var text = event.target.localName
+    if (text.includes("label")) {
+        setCurrentLabel(event.target.htmlFor)
+    }
+    
+})
+*/
+
+/*
+document.addEventListener("DOMContentLoaded", function(event) { 
+    //do work
+    var allLabels = document.body.getElementsByTagName("label") 
+    var x = allLabels.length
+
+    for (var i = 0; i < x; i++) {
+        //add listener
+        allLabels[i].addEventListener("mouseenter", setCurrentLabel(allLabels[i].htmlFor))
+    }
+
+  });
+*/
+
+
+//keystroke listener for up and down arrows used to change parameter values
+window.addEventListener("keydown", function (event) {
+    if (event.defaultPrevented) {
+      return; // Do nothing if the event was already processed
+    }
+
+    if (currentParam == "") {
+        //nothing selected so ignore the key press
+        return
+    }
+
+    var mock = new Object()
+  
+    switch (event.key) {
+      case "ArrowDown":
+        // Do something for "down arrow" key press.
+        //create object with parameters of the event used by update method- layerY, target.id, etc.
+        mock = {"layerY": 20, "target": {"id": currentParam, "min": 1, "max": 20}}
+        //need min and max to match the html page (maybe just read the page and set same values to ensure no errors)
+        //now call update
+        update(mock)
+        break;
+      case "ArrowUp":
+        // Do something for "up arrow" key press.
+        //create object with parameters of the event used by update method- layerY, target.id, etc.
+        mock = {"layerY": 1, "target": {"id": currentParam, "min": 1, "max": 20}}
+        //need min and max to match the html page (maybe just read the page and set same values to ensure no errors)
+        //now call update
+        update(mock)
+        break;
+      default:
+        return; // Quit when this doesn't handle the key event.
+    }
+  
+    // Cancel the default action to avoid it being handled twice
+    event.preventDefault();
+  }, true);
+
+
