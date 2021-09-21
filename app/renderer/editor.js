@@ -677,6 +677,15 @@ function createChartData() {
           }]
         },
         options: {
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: "Amplitude ADSR"
+                }
+            },
             scales: {
                 y: {
                     beginAtZero: true,
@@ -713,6 +722,15 @@ function createChartData() {
           }]
         },
         options: {
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: "Filter ADSR"
+                }
+            },
             scales: {
                 y: {
                     beginAtZero: true,
