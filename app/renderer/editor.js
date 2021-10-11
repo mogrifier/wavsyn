@@ -3,6 +3,7 @@
 //would like to use same listeners but with some extra parameters to identify
 //which sound/program was being edited.
 //user sets these. all midi functions must use them. 
+var platform = "win32"
 var midiIn = -1
 var midiOut = -1
 var isMidiConfigured = false
@@ -59,7 +60,7 @@ var parameterScale = {'monomode':1, 'lfo_freq':1 , 'lfo_depth':1, 'osc_detune':1
     'aea':1, 'aep':1, 'aed':1, 'aes':1, 'aer':1, 
     'aeva':4, 'aevp':4, 'aevd':4, 'aevs':4, 'aevr':4}
 
-
+window.api.send("getPlatform")
 
 
 //generic method to update the value for a field/control given by the label.
@@ -485,6 +486,10 @@ function showLogs(message){
     console.log(message)
 }
 
+window.api.receive("getPlatform", (event, args) => {
+    platform = args.toString()
+    console.log(`Wavsyn is running on ${platform}`)
+})
 
 window.api.receive('parameterValue', (event, args) => {
           /*
@@ -593,7 +598,7 @@ window.api.receive('midiPorts', (event, arg) => {
         //I know there is only one 'k'
         for (var k in arg["inputs"][i]) {
             option.value = arg["inputs"][i][k]
-            option.text = k
+            option.text = modifyPortName(k)
         }
         inputList.appendChild(option);
     }
@@ -610,11 +615,27 @@ window.api.receive('midiPorts', (event, arg) => {
         option = document.createElement("option");
         for (k in arg["outputs"][i]) {
             option.value = arg["outputs"][i][k]
-            option.text = k
+            option.text = modifyPortName(k)
         }
         outputList.appendChild(option);
     }
 })
+
+/* MIDI port names appear different on Mac and Windows. This functions fixes that
+to make display of the names simpler.
+
+This piece of code could be really brittle and need updates for different interfaces
+*/
+function modifyPortName(name) {
+    //remove all after last blank or not, depending on platform
+    if (platform.indexOf("win") > -1) {
+        let end = name.lastIndexOf(" ")
+        return name.substring(0, end)
+    }
+    else {
+        return name
+    }
+  }
 
 
 //get midi parameter response from mirage
@@ -676,6 +697,15 @@ function createChartData() {
           }]
         },
         options: {
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: "Amplitude ADSR"
+                }
+            },
             scales: {
                 y: {
                     beginAtZero: true,
@@ -712,6 +742,15 @@ function createChartData() {
           }]
         },
         options: {
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: "Filter ADSR"
+                }
+            },
             scales: {
                 y: {
                     beginAtZero: true,

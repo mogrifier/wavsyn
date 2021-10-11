@@ -84,6 +84,11 @@ ipcMain.on("toMain", (event, args) => {
     mainWindow.webContents.send("fromMain", tools.allTools[toolName](source, destination));
 });
 
+ipcMain.on("getPlatform", (event, args) => {
+  let platform = process.platform
+  mainWindow.webContents.send("getPlatform", platform);
+});
+
 function showWarning(args) {
   let options = {
     title : "I'm sorry, Dave, I'm afraid I can't do that.",
