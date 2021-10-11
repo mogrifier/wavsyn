@@ -628,13 +628,19 @@ This piece of code could be really brittle and need updates for different interf
 */
 function modifyPortName(name) {
     //remove all after last blank or not, depending on platform
-    if (platform.indexOf("win") > -1) {
+    if (platform === "darwin") {
+        return name
+    }
+    elsif (platform.indexOf("win") > -1) {
+        //win32 or win64
         let end = name.lastIndexOf(" ")
         return name.substring(0, end)
     }
     else {
+        //linux. don't know yet whant port names look like
         return name
     }
+
   }
 
 
