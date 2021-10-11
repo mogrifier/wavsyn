@@ -756,7 +756,7 @@ function setCurrentLabel(event) {
     if (text.includes("label")) {
         currentParam = event.target.htmlFor
     }
-    
+    console.log(`new parameter ${currentParam}`)
 }
 
 /*
@@ -786,7 +786,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
 
 //keystroke listener for up and down arrows used to change parameter values
-window.addEventListener("keydown", function (event) {
+window.addEventListener("keyup", function (event) {
     if (event.defaultPrevented) {
       return; // Do nothing if the event was already processed
     }

@@ -86,7 +86,7 @@
             </legend>
             <div class="row">
                 <div class="col-sm-7">
-                    <label for="cutoff">Filter Cutoff</label>
+                    <label for="cutoff" onmouseenter="setCurrentLabel(event)">Filter Cutoff</label>
                 </div>
                 <div class="col-sm-5">
                     <input type="number" id="cutoff" class="ledspinner" value="0" min="0" max="99" onclick="update(event)" onmousedown="return false">
@@ -94,7 +94,7 @@
             </div>
             <div class="row">
                 <div class="col-sm-7">
-                    <label for="resonance">Resonance</label>
+                    <label for="resonance" onmouseenter="setCurrentLabel(event)">Resonance</label>
                 </div>
                 <div class="col-sm-5">
                     <input type="number" id="resonance" class="ledspinner" value="0" min="0" max="40" onclick="update(event)" onmousedown="return false">
@@ -102,7 +102,7 @@
             </div>
             <div class="row">
                 <div class="col-sm-7">
-                    <label for="tracking">Filter Tracking</label>
+                    <label for="tracking" onmouseenter="setCurrentLabel(event)">Filter Tracking</label>
                 </div>
                 <div class="col-sm-5">
                     <input type="number" id="tracking" class="ledspinner" value="0" min="0" max="4" onclick="update(event)" onmousedown="return false">
@@ -196,7 +196,7 @@
 
                     <div class="row">
                         <div class="col-sm-7">
-                            <label for="aea" onmouseenter="setCurrentLabel(event)">Attack</label>
+                            <label for="aea" >Attack</label>
                         </div>
                         <div class="col-sm-5">
                             <input type="number" id="aea" class="ledspinner" value="0" min="0" max="31" onclick="update(event)" onmousedown="return false">
