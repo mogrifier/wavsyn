@@ -631,7 +631,7 @@ function modifyPortName(name) {
     if (platform === "darwin") {
         return name
     }
-    elsif (platform.indexOf("win") > -1) {
+    else if (platform.indexOf("win") > -1) {
         //win32 or win64
         let end = name.lastIndexOf(" ")
         return name.substring(0, end)
