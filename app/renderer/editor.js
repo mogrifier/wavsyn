@@ -586,6 +586,7 @@ window.api.receive('midiPorts', (event, arg) => {
     }
 
     //read the inputs
+    showLogs("**Raw MIDI Input list**")
     var inputList = document.getElementById("midi_in")
     var option = document.createElement("option");
     option.value = -1
@@ -598,6 +599,7 @@ window.api.receive('midiPorts', (event, arg) => {
         //I know there is only one 'k'
         for (var k in arg["inputs"][i]) {
             option.value = arg["inputs"][i][k]
+            showLogs(k)
             option.text = modifyPortName(k)
         }
         inputList.appendChild(option);
@@ -609,12 +611,14 @@ window.api.receive('midiPorts', (event, arg) => {
     option.text = "select output"
     outputList.appendChild(option);
     //now read the outputs and load
+    showLogs("**Raw MIDI Output list**")
     for (i = 0; i < arg["outputs"].length; i++) {
         //load the dropdown lists
         //Create and append the options
         option = document.createElement("option");
         for (k in arg["outputs"][i]) {
             option.value = arg["outputs"][i][k]
+            showLogs(k)
             option.text = modifyPortName(k)
         }
         outputList.appendChild(option);
