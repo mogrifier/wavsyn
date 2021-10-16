@@ -7,7 +7,9 @@ const {dialog} = require('electron');
 var WAVHEADER = 44
 var TRACK_LENGTH = 5632
 var MIRAGESOUNDS = 393216
+var SINGLESOUND = 65536
 var TEMPLATE = "sample_template_16kb.img"
+var soundNames = ["lower 1", "upper 1", "lower 2", "upper 2", "lower 3", "upper 3"]
 
 /* This is like the public interface of the tools.js module **/
         //put each function for manipulating wavetables, samples, and image files in here
@@ -177,6 +179,8 @@ var allTools = {
                 logString[index++] = `skipping file ${fileName} since it does not contain ${MIRAGESOUNDS} bytes as required`
                 continue
             }
+            //change 0 value samples to 1
+            wavesamples = code.dezero(wavesamples)
             var newImage = Buffer.alloc(template.byteLength)
             //write template data to newImage (newImage is reused for each file so a new object is needed)
             template.copy(newImage, 0, 0, template.byteLength)
@@ -207,6 +211,73 @@ var allTools = {
         return logString
     },
 
+    coalesceTo384KB : function (source, destination) {
+        /*general algorithm is create 6 64KB buffers. Add files from source until you can add no more then pad (with 1's) to fill.
+        Write log of memory pages for each file. combine the buffers into a single 384KB file and write that file 
+        to destination. Dezero file. Remember that write order ia lower1, upper1, lower2, upper2, lower3, upper3.
+        */
+        
+        var logString = new Array()
+        var index = 0
+        logString[index++] = "**Coalescing files to 384KB file for disk image writing**"
+        let allFiles = code.getFileList(source)
+        let fileIndex = 0
+        while (fileIndex < allFiles.length) {
+            var newImageAudio = Buffer.alloc(MIRAGESOUNDS)
+            var soundsCopied = 0
+            for (var i = 0; i < 6; i++) {
+                logString[index++] = `creating sound ${soundNames[i]}`
+                var full = false
+                var newSound = Buffer.alloc(SINGLESOUND)
+                var usedSize = 0
+                while (!full && (fileIndex < allFiles.length)) {
+                    //add 8-bit files until full
+                    var name_stub = path.parse(allFiles[fileIndex]).name
+                    var wavesamples = code.readFileBytes(allFiles[fileIndex], source)
+                    //in case 8bit file has a header
+                    wavesamples = code.removeWaveHeader(wavesamples)
+                    if (wavesamples.length > SINGLESOUND) {
+                        logString[index++] = `skipping file ${name_stub} because it is larger than  ${SINGLESOUND} bytes.`
+                        continue
+                    }
+                    //change 0 value samples to 1
+                    wavesamples = code.dezero(wavesamples)
+                    if (usedSize + wavesamples.byteLength <= SINGLESOUND) {
+                        //write sample data to newSound if it fits
+                        wavesamples.copy(newSound, usedSize, 0, wavesamples.byteLength)
+                        //log it
+                        logString[index++] = `\tAdding file ${name_stub}. Memory range is ${code.getHex(usedSize)} to ${code.getHex(usedSize + wavesamples.byteLength) - 1}`
+                        usedSize += wavesamples.byteLength
+                        //moved to next file
+                        fileIndex++
+                        //test if perfectly full (no need to pad)
+                        if (usedSize == SINGLESOUND) {
+                            full = true
+                            //copy to newImageAudio to the correct 64KB slot
+                            newSound.copy(newImageAudio, i * SINGLESOUND, 0, SINGLESOUND)
+                            soundsCopied++
+                        }
+                    }
+                    else {
+                        //pad the file with 1's to end
+                        for (var j = usedSize; j < SINGLESOUND; j++) {
+                            newSound[j] = 1
+                        }
+                        full = true
+                        //copy to newImageAudio to the correct 64KB slot
+                        newSound.copy(newImageAudio, i * SINGLESOUND, 0, SINGLESOUND)
+                        soundsCopied++
+                    }
+                }
+            }
+            //end for; write the 384KB file to disk. Make up a name.
+            let imageName = (new Date()).getTime()
+            code.writeFile(newImageAudio, `imageaudio_${imageName}.wav`, destination)
+            logString[index++] = `**Wrote disk image audio file ${imageName}.wav**`
+        }
+        return logString
+    },
+
 
     help: {"writeDiskImage":`Write a mirage disk image from 384KB source audio files. Files must be unsigned 8 bit,
      mono, PCM. The wave header will be removed if present. This creates a 440KB disk image file (extension .edm) for use with 
@@ -221,7 +292,11 @@ var allTools = {
 
     "extractWavesamples": `Remove all 6 sound chunks from a mirage disk image and write as 6 separate 
     64KB files of 8-bit, unsigned pcm data. File names are based on image file name with a suffix indicating the 
-    sound they came from.`}
+    sound they came from.`,
+
+    "coalesceTo384KB": `Takes a folder of 8-bit files and combines them into a single 384KB file for writing to a disk image. Sample 
+    files cannot cross the 64KB barrier of each sound. They will be padded as needed. A log of the Mirage memory page range of each 
+    file is created. Files are added in alphabetical order.`}
 }
 
 
@@ -291,7 +366,7 @@ var code = {
             eight_bit[index++] = Math.round(((value + 1) / 2) * 255)
         }
         
-        return eight_bit
+        return code.dezero(eight_bit)
     },
 
     convert_16b_to_8bit : function (input_bytes) {
@@ -305,7 +380,23 @@ var code = {
             //change range to 0 - 65535 and grab MSB
             eight_bit[index++] = Math.round((value + 32768) / 255)
         }
-        return eight_bit
+        return code.dezero(eight_bit)
+    },
+
+    dezero : function (input_bytes) {
+        //value cannot be zero on Mirage- that means loop stop and can cause trouble
+        for (let i = 0; i < input_bytes.length; i++) {
+            if (input_bytes[i] == 0) {
+                input_bytes[i] = 1
+            }
+        }
+        return input_bytes
+    },
+
+    getHex : function (location) {
+        //convert to Mirage page number
+        let pages = location / 256
+        return pages.toString(16)
     },
 
     //source is a directory
