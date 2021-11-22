@@ -2,6 +2,7 @@ const path = require ("path")
 const fs = require ("fs")
 const { exec } = require('child_process')
 const {dialog} = require('electron');
+const { O_DIRECTORY } = require("constants");
 
 //Global variables
 var WAVHEADER = 44
@@ -17,7 +18,7 @@ var allTools = {
     convert32_to_8bit: function (source, destination) {
         var logString = new Array()
         //read files into buffers and process using function below
-        let allFiles = code.getFileList(source)
+        let allFiles = code.getFileList(source, ["wav"])
         let index = 0
         logString[index++] = "**Converting 32bit to 8 bit files**"
         for (const fileName of allFiles){
@@ -34,7 +35,7 @@ var allTools = {
     convert16_to_8bit: function (source, destination) {
         var logString = new Array()
         //read files into buffers and process using function below
-        let allFiles = code.getFileList(source)
+        let allFiles = code.getFileList(source, ["wav"])
         let index = 0
         logString[index++] = "**Converting 16bit to 8 bit files**"
         for (const fileName of allFiles){
@@ -63,12 +64,12 @@ var allTools = {
         var logString = new Array()
         var index = 0
         logString[index++] = "**Converting .edm/.img to .hfe files**"
-        let allFiles = code.getFileList(source)
+        let allFiles = code.getFileList(source, ["edm", "img"])
 
         let goodFiles = new Array()
         for (const fileName of allFiles) {
             //only allow files that end in edm or img and have have no spaces in them
-            if ((fileName.endsWith('.edm') || fileName.endsWith('.img')) && fileName.indexOf(' ') < 0 
+            if ( fileName.indexOf(' ') < 0 
                 && source.indexOf(' ') < 0 && destination.indexOf(' ') < 0) {
                 goodFiles.push(fileName)
             }
@@ -116,7 +117,7 @@ var allTools = {
     */
     extractWavesamples: function (source, destination) {
         //read files into buffers and process using function below
-        let allFiles = code.getFileList(source)
+        let allFiles = code.getFileList(source, ["edm", "img"])
         var logString = new Array()
         var index = 0
         logString[index++] = "**Reading samples from Mirage disk images**"
@@ -170,7 +171,7 @@ var allTools = {
         var logString = new Array()
         var index = 0
         logString[index++] = "**Writing disk images (.edm) files**"
-        let allFiles = code.getFileList(source)
+        let allFiles = code.getFileList(source, ["wav"])
         for (const fileName of allFiles){
             var name_stub = path.parse(fileName).name
             var wavesamples = code.readFileBytes(fileName, source)
@@ -220,7 +221,7 @@ var allTools = {
         var logString = new Array()
         var index = 0
         logString[index++] = "**Coalescing files to 384KB file for disk image writing**"
-        let allFiles = code.getFileList(source)
+        let allFiles = code.getFileList(source,["wav"])
         let fileIndex = 0
         while (fileIndex < allFiles.length) {
             var newImageAudio = Buffer.alloc(MIRAGESOUNDS)
@@ -399,9 +400,20 @@ var code = {
         return pages.toString(16)
     },
 
-    //source is a directory
-    getFileList : function (source) {
-        return fs.readdirSync(source)
+    //source is a directory. Only return files- not any directories.
+    getFileList : function (source, filter) {
+        let all_entries = fs.readdirSync(source)
+        let all_files = new Array()
+        for (let i = 0; i < all_entries.length; i++) {
+            //check if a file name matches extensions in filter
+            for (let j = 0; j < filter.length; j++) {
+                if (all_entries[i].endsWith(filter[j])) {
+                    all_files.push(all_entries[i])
+                    break
+                }
+            }
+        }
+        return all_files
     },
 
     isWaveFile : function (data) {
