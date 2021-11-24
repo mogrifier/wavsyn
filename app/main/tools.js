@@ -167,10 +167,11 @@ var allTools = {
     // Source Files should be 384KB, with defined 64KB chunks representing samples for each Mirage Sound.
     writeDiskImage: function (source, destination) {
         // this is a pretty good choice for a template since all 12 programs are setup (I think)
-        var template = code.readFileBytes(TEMPLATE, "./app/assets")
-        var logString = new Array()
         var index = 0
+        var logString = new Array()
         logString[index++] = "**Writing disk images (.edm) files**"
+        logString[index++]  = `path to executing file = ${__dirname}`
+        var template = code.readFileBytes(TEMPLATE, __dirname + path.sep + ".." + path.sep + "assets")
         let allFiles = code.getFileList(source, ["wav"])
         for (const fileName of allFiles){
             var name_stub = path.parse(fileName).name
