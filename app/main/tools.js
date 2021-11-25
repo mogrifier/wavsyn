@@ -250,7 +250,7 @@ var allTools = {
                         //write sample data to newSound if it fits
                         wavesamples.copy(newSound, usedSize, 0, wavesamples.byteLength)
                         //log it
-                        logString[index++] = `\tAdding file ${name_stub}. Memory range is ${code.getHex(usedSize)} to ${code.getHex(usedSize + wavesamples.byteLength) - 1}`
+                        logString[index++] = `\tAdding file ${name_stub}. Memory range is 0x${code.getHex(usedSize, false).toUpperCase()} to 0x${code.getHex(usedSize + wavesamples.byteLength, true).toUpperCase()}`
                         usedSize += wavesamples.byteLength
                         //moved to next file
                         fileIndex++
@@ -397,10 +397,15 @@ var code = {
         return input_bytes
     },
 
-    getHex : function (location) {
-        //convert to Mirage page number
-        let pages = location / 256
-        return pages.toString(16)
+    getHex : function (location, minus1) {
+        //convert to Mirage page number. Round fractions up so it shows next page number is used, even if not complete.
+        //this will probably do nothing once page boundary fix is in place, since EVERYTHING will be padded to something 
+        //evenly divisible by 256.
+        let pages = Math.ceil(location / 256)
+        if (minus1) {
+            pages = pages - 1
+        }
+        return  pages.toString(16)
     },
 
     //source is a directory. Only return files- not any directories.
