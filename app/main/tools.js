@@ -240,6 +240,8 @@ var allTools = {
                     wavesamples = code.removeWaveHeader(wavesamples)
                     if (wavesamples.length > SINGLESOUND) {
                         logString[index++] = `skipping file ${name_stub} because it is larger than  ${SINGLESOUND} bytes.`
+                        //move to next file
+                        fileIndex++
                         continue
                     }
                     //change 0 value samples to 1
