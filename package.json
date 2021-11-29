@@ -1,6 +1,6 @@
 {
   "name": "wavsyn",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Tools for audio processing, creating disk images, and editing programs on the Ensoniq Mirage.",
   "main": "main.js",
   "scripts": {
