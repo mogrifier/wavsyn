@@ -41,7 +41,7 @@
     "@electron-forge/publisher-github": "^6.0.0-beta.61",
     "@typescript-eslint/eslint-plugin": "^4.26.0",
     "@typescript-eslint/parser": "^4.26.0",
-    "electron": "^13.0.1",
+    "electron": "^13.3.0",
     "eslint": "^7.32.0",
     "jest": "^27.0.3"
   },
@@ -49,6 +49,8 @@
     "@electron-forge/maker-dmg": "^6.0.0-beta.60",
     "electron-log": "^4.3.5",
     "electron-squirrel-startup": "^1.0.0",
+    "fix": "^0.0.6",
+    "meow": "^3.7.0",
     "midi": "^1.0.4",
     "nan": "^2.14.2"
   },
