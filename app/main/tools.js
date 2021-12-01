@@ -81,13 +81,25 @@ var allTools = {
 
         for (const fileName of goodFiles) {
             //will not process filenames with spaces. tried single quotes and did not work, even though does in powershell.
-            let command = "hxcfe -finput:" + source  + path.sep + fileName + " -foutput:" 
-                + destination + path.sep + path.parse(fileName).name + ".hfe"
-                + " -conv -ifmode:GENERIC_SHUGART_DD_FLOPPYMODE"
-            //var msg = exec("hxcfe -finput:${source}\\analog.edm -foutput:${destination}\\analog.hfe -conv -ifmode:GENERIC_SHUGART_DD_FLOPPYMODE")
-            console.log(command)
-            let msg = exec(command)
+            var msg
+            var command
+            //I cannot get a CLI process to work, but hxcfloppyemulator at least starts
+            if (process.platform == "darwin") {
+                command = "hxcfloppyemulator"
+                logString[index++] = (`Running: ${command}. You must use the HXCFE UI to perform this operation on a Mac.`)
+                msg = exec(command)
+                //no reason to loop on a Mac
+                break
+            }
+            else {
+                command = "hxcfe -finput:" + source  + path.sep + fileName + " -foutput:" 
+                    + destination + path.sep + path.parse(fileName).name + ".hfe"
+                    + " -conv -ifmode:GENERIC_SHUGART_DD_FLOPPYMODE"
+                //var msg = exec("hxcfe -finput:${source}\\analog.edm -foutput:${destination}\\analog.hfe -conv -ifmode:GENERIC_SHUGART_DD_FLOPPYMODE")
+                console.log(command)
+            }
 
+            msg = exec(command)
             msg.stdout.on('data', (data) => {
                 console.log(`stdout: ${data}`);
             });
