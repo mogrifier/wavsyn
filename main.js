@@ -496,6 +496,14 @@ const template = [
       { role: 'togglefullscreen' }
     ]
   },
+  {
+    label: 'Edit',
+    submenu: [
+      { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" },
+      { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" }
+      
+    ]
+  },
   // { role: 'windowMenu' }
   {
     label: 'Window',
