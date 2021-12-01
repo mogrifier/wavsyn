@@ -3,6 +3,7 @@ const fs = require ("fs")
 const { exec } = require('child_process')
 const {dialog} = require('electron');
 const { O_DIRECTORY } = require("constants");
+const int24 = require('int24');
 
 //Global variables
 var WAVHEADER = 44
@@ -26,6 +27,23 @@ var allTools = {
             let data32 = code.readFileBytes(fileName, source)
             //remove 100 byte header and convert
             let data8 = code.convert_32bf_to_8bit(code.removeWaveHeader(data32, 100))
+            //write new data to a file
+            code.writeFile(data8, "8bit_" + fileName, destination)
+            logString[index++] = `converting ${fileName} to 8-bit`
+        }
+        return logString
+    },
+    convert24_to_8bit: function (source, destination) {
+        var logString = new Array()
+        //read files into buffers and process using function below
+        let allFiles = code.getFileList(source, ["wav"])
+        let index = 0
+        logString[index++] = "**Converting 24bit to 8 bit files**"
+        for (const fileName of allFiles){
+            console.log (`converting ${fileName} to 8-bit`)
+            let data24 = code.readFileBytes(fileName, source)
+            //remove 44 byte header and convert
+            let data8 = code.convert_24b_to_8bit(code.removeWaveHeader(data24))
             //write new data to a file
             code.writeFile(data8, "8bit_" + fileName, destination)
             logString[index++] = `converting ${fileName} to 8-bit`
@@ -304,6 +322,9 @@ var allTools = {
 
     "convert16_to_8bit":"Convert 16 bit mono files to 8 bit unsigned raw data. If wave header present, assumes 44 byte length.",
 
+    "convert24_to_8bit":"Convert 24 bit mono files to 8 bit unsigned raw data. If wave header present, assumes 44 byte length.",
+
+
     "convert32_to_8bit":"Convert 32 bit float mono files to 8 bit unsigned raw data. If wave header present, assumes 100 byte length.",
 
     "extractWavesamples": `Remove all 6 sound chunks from a mirage disk image and write as 6 separate 
@@ -384,6 +405,23 @@ var code = {
         
         return code.dezero(eight_bit)
     },
+
+        //Take a data stream consisting of 24 bit integer (audio data) and convert to 8 bit. Assuming little-endian data.
+        convert_24b_to_8bit : function (input_bytes) {
+            let size = input_bytes.length
+            //24 bit integer are 3 byte values.
+            let eight_bit = Buffer.alloc(size / 3)
+            var index = 0
+            for (let i = 0; i < size; i += 3) {
+                //read 3 and unpack 3 bytes in little-endian order to an integer. read from buffer using offset
+                let value = int24.readInt24LE(input_bytes, i)
+                //value is expected to be in range −8,388,608 to 8,388,607. Convert to 0 - 255.
+                //note there are minor differences between this code and python. Maybe floating point handling or rounding.
+                eight_bit[index++] = Math.round(((value + 8388608)/16777215)  * 255)
+            }
+            
+            return code.dezero(eight_bit)
+        },
 
     convert_16b_to_8bit : function (input_bytes) {
         let size = input_bytes.length

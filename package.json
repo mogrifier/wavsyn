@@ -1,6 +1,6 @@
 {
   "name": "wavsyn",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Tools for audio processing, creating disk images, and editing programs on the Ensoniq Mirage.",
   "main": "main.js",
   "scripts": {
@@ -50,6 +50,7 @@
     "electron-log": "^4.3.5",
     "electron-squirrel-startup": "^1.0.0",
     "fix": "^0.0.6",
+    "int24": "0.0.1",
     "meow": "^3.7.0",
     "midi": "^1.0.4",
     "nan": "^2.14.2"
