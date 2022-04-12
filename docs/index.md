@@ -1,37 +1,15 @@
-## Welcome to GitHub Pages
+## Welcome to Wavsyn
 
-You can use the [editor on GitHub](https://github.com/mogrifier/wavsyn/edit/main/docs/index.md) to maintain and preview the content for your website in Markdown files.
+Read all about Wavsyn at the [Wavsyn Wiki](https://github.com/mogrifier/wavsyn/wiki)
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+### Relases
 
-### Markdown
+Want to just just right in the hard way? [Releases](https://github.com/mogrifier/wavsyn/releases)
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+### Support and free stuff
 
-```markdown
-Syntax highlighted code block
+[Join the Wavsyn Discord](https://discord.gg/MSzvZ7acVe)
+If you are real nice, you can also email me at wavsyn on gmail.com
 
-# Header 1
-## Header 2
-### Header 3
+Did you say free? Yes, I post Mirage disk images I create with Wavsyn on my Discord in the patches channel.
 
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [Basic writing and formatting syntax](https://docs.github.com/en/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/mogrifier/wavsyn/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
