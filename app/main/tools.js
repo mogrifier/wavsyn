@@ -8,6 +8,7 @@ const factorial = require("factorial")
 
 //Global variables
 var WAVHEADER = 44
+var KB = 1024
 var TRACK_LENGTH = 5632
 var MIRAGESOUNDS = 393216
 var SINGLESOUND = 65536
@@ -314,7 +315,7 @@ var allTools = {
     },
 
     interpolate : function (source, destination) {
-        /*Apply to only 1KB wav files in source folder. Each is interpolated over 31 steps, then reversed. The result is
+        /*Apply to only 1KB wav or raw files in source folder. Each is interpolated over 31 steps, then reversed. The result is
         32 steps going from wav A to wav B, then 32 steps from wav B to wav A. This means there are two copies of wav B in the middle.
         */
         var logString = new Array()
@@ -322,16 +323,19 @@ var allTools = {
         var data
         var pcm
         logString[index++] = "**Interpolating files to create set of new 64KB files.**"
-        let allFiles = code.getFileList(source,["wav"])
+        let allFiles = code.getFileList(source,["wav", "raw"])
         let fileIndex = 0
         let pcmIndex = 0
         var pcmData = new Array()
+        
 
         //get good list of files- correct size, no wav headers
         for (const fileName of allFiles){
             //logString[index++] = `processing file ${fileName}`
             data = code.readFileBytes(fileName, source)
             //check if less than 1KB of data plus wav header length, strip if needed
+            //audacity writes a long header (124 bytes) in some export mmodes- must compensate.
+            //FIXME
             if (data.byteLength <= 1024 + WAVHEADER) {
                 pcm = code.removeWaveHeader(data, 44)
                 //save good 1024 bytes chunks of pcm data
@@ -342,20 +346,25 @@ var allTools = {
         //code for creating the permutations of file pairs to be interpolated    
         //for n things taken r at a time (r = 2 in my case) n!/r!(n-r)!  where ! == factorial
         var permutations = factorial(pcmData.length)/(factorial(2) * factorial(pcmData.length - 2))
+
         if (permutations > 0) {
             logString[index++] = `Interpolation process will create ${permutations} new 64KB files`
+            //create number pairs using two for loops. Increment start of second loop. I am treating pairs AC as same as CA.
+            for (var x = 0; x < pcmData.length - 1; x++) {
+            
+                for (var y = x + 1; y < pcmData.length; y++) {
+                    //interpolate from x to y and write resulting 64KB file
+                    //generate file name
+                    var name = `new${fileIndex++}.wav`
+                    code.writeFile (code.interpolateWaveforms(pcmData[x], pcmData[y]), name, destination)
+                    logString[index++] = `Wrote ${name} to ${destination}`
+                }
+            }
         }
         else {
-            logString[index++] = `No files will be created. At least 2 1KB *.wav files must be in ${source}`
+            logString[index++] = `No files will be created. At least 2 1KB *.wav or *.raw files must be in ${source}`
         }
-        //create number pairs using two for loops. Increment start of second loop. I am treating pairs AC as same as CA.
-
-        //code for performing interpolation- make this a separation functions that takes two byte arrays
-
-
-        //write resulting file data. need to create a name from source files, perhaps
-
-
+        
         return logString
     },
 
@@ -397,8 +406,38 @@ Non-exported functions are like 'private' functions **/
 
 var code = {
 
+    /* Interpolate between waveforms.
+    */
     interpolateWaveforms : function (wave1, wave2) {
         var interpolationResult = Buffer.alloc(SINGLESOUND)
+        //write starting/ending waveforms to the result buffer. 31 is an end. 32 is start of reverse direction.
+        //wave1.copy(interpolationResult, 0, 0, 1024)
+        //wave1.copy(interpolationResult, 1024 * 63, 0, 1024)
+        var i = 0
+        var delta = 0
+        var j = 0
+
+        //forward
+        for (i = 0; i < KB; i++) {
+            /*for each starting byte, look at value of corresponding byte in final waveform. Compute delta
+            and divde by 31. That is step value (could be + or -). Write each new value for the step into the
+            result buffer. I expect discontinuities, but don't know if that will be OOK audibly or not.
+            There are two parts to this- forward and backwards interpolation
+            */
+            delta = (wave2[i] - wave1[i]) / 32
+            for (j = 0; j < 32; j++) {
+                //fill buffer for all points from start to finish, one set at a time for an i value
+                interpolationResult[j * KB + i] = wave1[i] +  Math.round(delta * j)
+            }
+        }
+        //reverse
+        for (i = 0; i < KB; i++) {
+            delta = (wave1[i] - wave2[i]) / 32
+            for (j = 32; j < 64; j++) {
+                //fill buffer for all points from start to finish, one set at a time for an i value
+                interpolationResult[j * KB + i] = wave2[i] +  Math.round(delta * (j - 32))
+            }
+        }
 
         return interpolationResult
     },
