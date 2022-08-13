@@ -49,6 +49,7 @@
     "@electron-forge/maker-dmg": "^6.0.0-beta.60",
     "electron-log": "^4.3.5",
     "electron-squirrel-startup": "^1.0.0",
+    "factorial": "^2.0.0",
     "fix": "^0.0.6",
     "int24": "0.0.1",
     "meow": "^3.7.0",

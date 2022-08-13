@@ -4,6 +4,7 @@ const { exec } = require('child_process')
 const {dialog} = require('electron');
 const { O_DIRECTORY } = require("constants");
 const int24 = require('int24');
+const factorial = require("factorial")
 
 //Global variables
 var WAVHEADER = 44
@@ -312,6 +313,52 @@ var allTools = {
         return logString
     },
 
+    interpolate : function (source, destination) {
+        /*Apply to only 1KB wav files in source folder. Each is interpolated over 31 steps, then reversed. The result is
+        32 steps going from wav A to wav B, then 32 steps from wav B to wav A. This means there are two copies of wav B in the middle.
+        */
+        var logString = new Array()
+        var index = 0
+        var data
+        var pcm
+        logString[index++] = "**Interpolating files to create set of new 64KB files.**"
+        let allFiles = code.getFileList(source,["wav"])
+        let fileIndex = 0
+        let pcmIndex = 0
+        var pcmData = new Array()
+
+        //get good list of files- correct size, no wav headers
+        for (const fileName of allFiles){
+            //logString[index++] = `processing file ${fileName}`
+            data = code.readFileBytes(fileName, source)
+            //check if less than 1KB of data plus wav header length, strip if needed
+            if (data.byteLength <= 1024 + WAVHEADER) {
+                pcm = code.removeWaveHeader(data, 44)
+                //save good 1024 bytes chunks of pcm data
+                pcmData[pcmIndex++] = pcm
+                logString[index++] = `${fileName} is 1KB file and will be used for interpolation`
+            }     
+        }
+        //code for creating the permutations of file pairs to be interpolated    
+        //for n things taken r at a time (r = 2 in my case) n!/r!(n-r)!  where ! == factorial
+        var permutations = factorial(pcmData.length)/(factorial(2) * factorial(pcmData.length - 2))
+        if (permutations > 0) {
+            logString[index++] = `Interpolation process will create ${permutations} new 64KB files`
+        }
+        else {
+            logString[index++] = `No files will be created. At least 2 1KB *.wav files must be in ${source}`
+        }
+        //create number pairs using two for loops. Increment start of second loop. I am treating pairs AC as same as CA.
+
+        //code for performing interpolation- make this a separation functions that takes two byte arrays
+
+
+        //write resulting file data. need to create a name from source files, perhaps
+
+
+        return logString
+    },
+
 
     help: {"writeDiskImage":`Write a mirage disk image from 384KB source audio files. Files must be unsigned 8 bit,
      mono, PCM. The wave header will be removed if present. This creates a 440KB disk image file (extension .edm) for use with 
@@ -333,7 +380,12 @@ var allTools = {
 
     "coalesceTo384KB": `Takes a folder of 8-bit files and combines them into a single 384KB file for writing to a disk image. Sample 
     files cannot cross the 64KB barrier of each sound. They will be padded as needed. A log of the Mirage memory page range of each 
-    file is created. Files are added in alphabetical order.`}
+    file is created. Files are added in alphabetical order.`,
+
+    "interpolate": `Takes a folder of 8-bit 1KB files and interpolates each with every other, creating new 64KB samples for use in
+    Mirage image files. 
+    `
+}
 }
 
 
@@ -344,6 +396,12 @@ Non-exported functions are like 'private' functions **/
 //Remove the 44 byte wavheader from the Buffer passed in. Returns a new Buffer.
 
 var code = {
+
+    interpolateWaveforms : function (wave1, wave2) {
+        var interpolationResult = Buffer.alloc(SINGLESOUND)
+
+        return interpolationResult
+    },
 
     collapseWaveData : function (samples) {
         var clean_wavesample = Buffer.alloc(66560)
