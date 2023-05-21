@@ -562,7 +562,7 @@ var code = {
         for (let i = 0; i < all_entries.length; i++) {
             //check if a file name matches extensions in filter
             for (let j = 0; j < filter.length; j++) {
-                if (all_entries[i].endsWith(filter[j])) {
+                if (all_entries[i].toLowerCase().endsWith(filter[j])) {
                     all_files.push(all_entries[i])
                     break
                 }
