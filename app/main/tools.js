@@ -439,7 +439,7 @@ var code = {
             }
         }
 
-        return interpolationResult
+        return code.dezero(interpolationResult);
     },
 
     collapseWaveData : function (samples) {
