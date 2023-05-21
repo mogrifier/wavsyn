@@ -64,27 +64,31 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "wavsyn"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin",
-            "win32"
-          ]
+            "name": "wavsyn",
+            "description": "Tools for audio processing, creating disk images, and editing programs on the Ensoniq Mirage.",
+            "author": "Erich Izdepski"
+            }
         },
         {
           "name": "@electron-forge/maker-deb",
-          "config": {}
+          "config": {"name": "wavsyn",
+          "description": "Tools for audio processing, creating disk images, and editing programs on the Ensoniq Mirage.",
+          "author": "Erich Izdepski"
+          }
         },
         {
           "name": "@electron-forge/maker-rpm",
-          "config": {}
+          "config": {"name": "wavsyn",
+          "description": "Tools for audio processing, creating disk images, and editing programs on the Ensoniq Mirage.",
+          "author": "Erich Izdepski"
+        }
         },
         {
           "name": "@electron-forge/maker-dmg",
-          "config": {}
+          "config": {"name": "wavsyn",
+          "description": "Tools for audio processing, creating disk images, and editing programs on the Ensoniq Mirage.",
+          "author": "Erich Izdepski"
+        }
         }
       ],
       "publishers": [
