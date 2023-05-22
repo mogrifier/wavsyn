@@ -529,7 +529,7 @@ var code = {
             //not as simple as I thought. Need unsigned values from signed 16 bit data
             let value = input_bytes.readInt16LE(i)
             //change range to 0 - 65535 and grab MSB
-            eight_bit[index++] = Math.round((value + 32768) / 255)
+            eight_bit[index++] = Math.round(((value + 32768)/65535) * 255)
         }
         return code.dezero(eight_bit)
     },
