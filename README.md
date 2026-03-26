@@ -1,6 +1,7 @@
 Wavsyn
 =================
 This is an Electron app. It is a port of proof of concept python code (from my MirageDiskTools project) for creating disk images for the Ensoniq Mirage.
+The project is no longer suported and is simply here if you want to take and use the code.
 ---
 Now what can it really do? ANYTHING. This app is a generic batch processor. It follows the simplest software abstraction there is:
 `input - process - output`
